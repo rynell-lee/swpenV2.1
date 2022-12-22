@@ -41,8 +41,8 @@ const CameraScreen = () => {
         const newCameraPermission = await Camera.requestCameraPermission();
         const newMicrophonePermission =
           await Camera.requestMicrophonePermission();
-        const mediaLibraryPermission =
-          await MediaLibrary.requestPermissionsAsync();
+        // const mediaLibraryPermission =
+        //   await MediaLibrary.requestPermissionsAsync();
         setPermission(
           newCameraPermission === "authorized" &&
             newMicrophonePermission === "authorized"
