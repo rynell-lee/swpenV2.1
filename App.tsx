@@ -7,11 +7,20 @@ import {
 import CameraScreen from "./src/screens/CameraScreen";
 import HomeScreen from "./src/screens/HomeScreen";
 import LoadingScreen from "./src/screens/LoadingScreen";
+import VideoReviewScreen from "./src/screens/VideoReviewScreen";
+import AnnotationScreen from "./src/screens/AnnotationScreen";
+import { Provider } from "./src/context/cameraContext";
+import MdModal2 from "./src/components/metadata/MdModal2";
+import TestScreen from "./src/screens/testScreen";
 
 export type RootStackParamList = {
   Home: undefined;
   Camera: undefined;
   Loading: undefined;
+  Review: undefined;
+  Annotation: undefined;
+  MdModal2: undefined;
+  Test: undefined;
 };
 
 export type NavigatorProps = NativeStackScreenProps<RootStackParamList>;
@@ -36,11 +45,14 @@ export default function RootNavigator() {
         />
         <Stack.Group
           screenOptions={({ navigation }) => ({
-            headerShown: true,
+            headerShown: false,
           })}
         >
           <Stack.Screen name="Camera" component={CameraScreen} />
-          {/* <Stack.Screen name="Loading" component={LoadingScreen} /> */}
+          <Stack.Screen name="Review" component={VideoReviewScreen} />
+          <Stack.Screen name="Annotation" component={AnnotationScreen} />
+          <Stack.Screen name="MdModal2" component={MdModal2} />
+          <Stack.Screen name="Test" component={TestScreen} />
         </Stack.Group>
       </Stack.Navigator>
     </NavigationContainer>

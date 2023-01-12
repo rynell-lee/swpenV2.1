@@ -1,0 +1,73 @@
+{
+  "option1": {
+    "category": ["Category", "Individual", "Team"],
+    "poolLength": ["Pool Length", "Short Course", "Long Course"],
+    "type": ["Type of race", "Competition", "Training"]
+  },
+  "option2": {
+    "gender": ["Gender", "Male", "Female", "Mixed"],
+    "length": ["Short course", "Long Course"],
+    "stroke": [
+      "Stroke",
+      "Freestyle",
+      "Breaststroke",
+      "Backstroke",
+      "Butterfly",
+      "Medley"
+    ],
+    "round": ["Round", "Heats", "Semifinals", "Finals"],
+    "event": {
+      "short course": {
+        "individual": {
+          "50": ["Freestyle", "Breaststroke", "Backstroke", "Butterfly"],
+          "100": [
+            "Freestyle",
+            "Breaststroke",
+            "Backstroke",
+            "Butterfly",
+            "Medley"
+          ],
+          "200": [
+            "Freestyle",
+            "Breaststroke",
+            "Backstroke",
+            "Butterfly",
+            "Medley"
+          ],
+          "400": ["Freestyle", "Medley"],
+          "800": ["Freestyle"],
+          "1500": ["Freestyle"]
+        },
+        "team": {
+          "4X50(Relay)": ["Freestyle", "Medley"],
+          "4X50(MixedRelay)": ["Freestyle", "Medley"],
+          "4X100(Relay)": ["Freestyle", "Medley"],
+          "4X100(MixedRelay)": ["Freestyle", "Medley"],
+          "4X200(Relay)": ["Freestyle"]
+        }
+      },
+      "long course": {
+        "individual": {
+          "50": ["Freestyle", "Breaststroke", "Backstroke", "Butterfly"],
+          "100": ["Freestyle", "Breaststroke", "Backstroke", "Butterfly"],
+          "200": [
+            "Freestyle",
+            "Breaststroke",
+            "Backstroke",
+            "Butterfly",
+            "Medley"
+          ],
+          "400": ["Freestyle", "Medley"],
+          "800": ["Freestyle"],
+          "1500": ["Freestyle"]
+        },
+        "team": {
+          "4X100(Relay)": ["Freestyle", "Medley"],
+          "4X100(MixedRelay)": ["Freestyle", "Medley"],
+          "4X200(Relay)": ["Freestyle"]
+        }
+      }
+    },
+    "raceType": ["Competition", "Training"]
+  }
+}
