@@ -8,7 +8,6 @@ import {
   Button,
 } from "react-native";
 import * as MediaLibrary from "expo-media-library";
-import { set } from "react-native-reanimated";
 import { useNavigation } from "@react-navigation/native";
 import { Video } from "expo-av";
 
@@ -20,12 +19,16 @@ type props = {
 };
 const VideoReviewScreen = (props: props) => {
   const navigation = useNavigation<any>();
-  const [video, setVideo] = useState<String>(props.route.params.video.path);
+  const [video, setVideo] = useState<string>(props.route.params.video.path);
   // const video = props.route.params.video.path; // figure out ltr
 
   const discard = () => {
     setVideo("undefined");
     navigation.navigate("Camera");
+  };
+
+  const saveVideo = () => {
+    MediaLibrary.saveToLibraryAsync(video);
   };
   console.log(`video uri: ${video}`);
   return (
@@ -34,7 +37,10 @@ const VideoReviewScreen = (props: props) => {
         <Button title="Discard" onPress={() => discard()} />
         <Button
           title="Annotate"
-          onPress={() => navigation.navigate("Annotationhahaha")}
+          onPress={() => {
+            saveVideo();
+            navigation.navigate("Annotation", { video });
+          }}
         />
       </View>
       <Video

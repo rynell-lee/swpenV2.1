@@ -17,6 +17,7 @@ import {
 } from "react-native-gesture-handler";
 import { FontAwesome5, FontAwesome } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
+import { Entypo } from "@expo/vector-icons";
 import MdModal1 from "../components/metadata/MdModal1";
 
 const HomeScreen = ({ navigation }: NavigatorProps) => {
@@ -71,7 +72,10 @@ const HomeScreen = ({ navigation }: NavigatorProps) => {
             navigation={navigation.navigate}
           />
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("Camera")}>
+          <Entypo name="video-camera" size={200} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("Annotation")}>
           <Ionicons
             name="cloud-sharp"
             size={200}

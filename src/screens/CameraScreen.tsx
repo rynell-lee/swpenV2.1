@@ -27,6 +27,12 @@ import { NavigatorProps } from "../../App";
 import { useIsFocused } from "@react-navigation/native";
 import Settings from "../components/camera/Settings";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Modal from "react-native-modal";
+import {
+  pickerOptions,
+  displayPicker,
+} from "../components/metadata/PickerOptions";
+import eventJson from "../jsons/events.json";
 
 interface Point {
   x: number;
@@ -44,7 +50,7 @@ const CameraScreen = (props: props) => {
   const getData = async () => {
     try {
       const jsonValue = await AsyncStorage.getItem("@metadata");
-      console.log(jsonValue);
+      // console.log(jsonValue);
       return jsonValue != null ? JSON.parse(jsonValue) : null;
     } catch (e) {
       // error reading value
@@ -111,15 +117,24 @@ const CameraScreen = (props: props) => {
   const [res, setRes] = useState<String>("FHD");
   const [isRecording, setIsRecording] = useState<Boolean>(false);
   const [audio, setAudio] = useState<boolean>(true);
+  const [course, setCourse] = useState<string>("25M");
+  const [distance, setDistance] = useState<string>("50M");
+  const [eventObj, setEventObj] = useState<any>({
+    "Pool Length": course,
+    Distance: distance,
+  });
+  const [distArray, setDistArray] = useState<Array<string>>([]);
+  const eJson: any = eventJson;
+  const [isModalVisible, setModalVisible] = useState<boolean>(false);
+  const toggleModal = () => {
+    setModalVisible(!isModalVisible);
+  };
   // console.log(`is flash on: ${flash}`);
 
   //states for timer
   const [start, setStart] = useState<number>(0);
   const [now, setNow] = useState<number>(0);
-  const [lapArray, setLapArray] = useState<Array<any>>([
-    [1, 1],
-    [3, 3],
-  ]);
+  const [lapArray, setLapArray] = useState<Array<any>>([]);
   const [timeInterval, setTimeInterval] = useState<any>();
   //states for marker
   const [i, setI] = useState<number>(0);
@@ -218,8 +233,13 @@ const CameraScreen = (props: props) => {
             setTimeInterval={setTimeInterval}
             setStart={setStart}
             setNow={setNow}
+            now={now}
+            start={start}
             lapArray={lapArray}
             setLapArray={setLapArray}
+            course={course}
+            distance={distance}
+            distArray={distArray}
           />
           {/* <EndMarker isRecording={isRecording} /> */}
         </View>
@@ -235,6 +255,11 @@ const CameraScreen = (props: props) => {
             isRecording={isRecording}
             audio={audio}
             setAudio={setAudio}
+            course={course}
+            setCourse={setCourse}
+            distance={distance}
+            setDistance={setDistance}
+            toggleModal={toggleModal}
           />
         </View>
       </GestureHandlerRootView>
@@ -246,6 +271,32 @@ const CameraScreen = (props: props) => {
           lapArray={lapArray}
         />
       </View>
+
+      <Modal
+        isVisible={isModalVisible}
+        backdropColor={"#00000080"}
+        onBackdropPress={toggleModal}
+      >
+        <View style={styles.box}>
+          <View style={styles.modalBox}>
+            {pickerOptions(3)?.map((x, index) =>
+              displayPicker(true, x, index, eventObj)
+            )}
+            <TouchableOpacity
+              onPress={() => {
+                // console.log(eventObj);
+                setCourse(eventObj["Pool Length"]);
+                setDistance(eventObj["Distance"]);
+                setDistArray(eJson[course][distance]);
+                // console.log(eJson["25M"]["100M"]);
+                toggleModal();
+              }}
+            >
+              <Text style={styles.done}>Done</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -282,10 +333,33 @@ const styles = StyleSheet.create({
     right: 20,
   },
   timer: {
-    // left: "46%",
+    left: "46%",
     top: 10,
     flex: 1,
     position: "absolute",
+  },
+  box: {
+    justifyContent: "center",
+    alignItems: "center",
+    flex: 1,
+    height: 50,
+    // position: "absolute",
+  },
+  modalBox: {
+    // position: "absolute",
+    padding: 10,
+    // paddingLeft: 100,
+    // flex: 1,
+    flexDirection: "column",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+    opacity: 1,
+    width: 250,
+    height: 200,
+  },
+  done: {
+    fontSize: 20,
+    alignSelf: "center",
   },
 });
 

@@ -3,6 +3,9 @@ import { TouchableOpacity, Button, StyleSheet, View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import RecordButton from "./Record";
 import { NavigationContainer } from "@react-navigation/native";
+import { Feather } from "@expo/vector-icons";
+import Modal from "react-native-modal";
+
 interface props {
   flash: Boolean;
   setFlash: Function;
@@ -11,12 +14,18 @@ interface props {
   isRecording: Boolean;
   audio: boolean;
   setAudio: Function;
+  course: String;
+  setCourse: Function;
+  distance: String;
+  setDistance: Function;
+  toggleModal: Function;
 }
 const Settings = (props: props) => {
   const [flashSettings, setFlashSettings] = useState<Boolean>(false);
   // const [flash, setFlash] = useState<Boolean>(false);
   const [resSettings, setResSettings] = useState<Boolean>(false);
   const [showAudio, setShowAudio] = useState<Boolean>(true);
+  const [showEvent, setShowEvent] = useState<Boolean>(true);
   // const [res, setRes] = useState<String>("FHD");
   const flash = props.flash;
   const setFlash = props.setFlash;
@@ -25,6 +34,11 @@ const Settings = (props: props) => {
   const isRecording = props.isRecording;
   const audio = props.audio;
   const setAudio = props.setAudio;
+  const course = props.course;
+  const setCourse = props.setCourse;
+  const distance = props.distance;
+  const setDistance = props.setDistance;
+  const toggleModal = props.toggleModal;
 
   //flash stuff
   const showFlashSettings = () => {
@@ -82,6 +96,7 @@ const Settings = (props: props) => {
   const showResSettings = () => {
     setResSettings(!resSettings);
     showAud();
+    showEvt();
   };
 
   const resOptions = () => {
@@ -151,12 +166,52 @@ const Settings = (props: props) => {
     setShowAudio(!showAudio);
   };
 
+  //pool length and distance
+
+  const showEvt = () => {
+    setShowEvent(!showEvent);
+  };
+  const event = () => {
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          toggleModal();
+          // eventOptions();
+        }}
+      >
+        <View style={styles.centre}>
+          <Feather name="square" size={50} color="white" />
+          <Text style={styles.distance}>{distance}</Text>
+          <Text style={styles.event}>{course}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  // const eventOptions = () => {
+  //   return (
+  //     <Modal
+  //       isVisible={isModalVisible}
+  //       backdropColor={"#00000080"}
+  //       onBackdropPress={toggleModal}
+  //     >
+  //       <View style={styles.box}>
+  //         <View style={styles.modalBox}>
+  //           <Text>Test</Text>
+  //         </View>
+  //       </View>
+  //     </Modal>
+  //   );
+  // };
+
+  //display settings
   const showSettings = () => {
     return (
       <View style={styles.container}>
         {/* {flashSettings ? flashOption() : singleFlash()} */}
         {resSettings ? resOptions() : singleRes()}
         {showAudio ? audioButton() : null}
+        {showEvent ? event() : null}
       </View>
     );
   };
@@ -167,8 +222,8 @@ const Settings = (props: props) => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "rgba(0,0,0, 0.5)",
-    width: 50,
-    height: 150,
+    width: 60,
+    height: 200,
     borderRadius: 60,
     justifyContent: "space-around",
     alignItems: "center",
@@ -178,7 +233,7 @@ const styles = StyleSheet.create({
   options: {
     backgroundColor: "black",
     width: 50,
-    height: 180,
+    height: 200,
     borderRadius: 60,
     justifyContent: "space-around",
     alignItems: "center",
@@ -195,6 +250,21 @@ const styles = StyleSheet.create({
   },
   hide: {
     opacity: 0,
+  },
+  distance: {
+    fontSize: 10,
+    color: "white",
+    position: "absolute",
+    marginTop: 12,
+  },
+  event: {
+    fontSize: 8,
+    color: "white",
+    position: "absolute",
+    marginTop: 26,
+  },
+  centre: {
+    alignItems: "center",
   },
 });
 

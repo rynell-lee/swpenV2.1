@@ -30,7 +30,7 @@ const Timer = (props: props) => {
   const start = props.start;
   const timer = now - start;
   const duration = moment.duration(timer);
-  // const seconds = Math.floor(duration.seconds() / 10);
+  const miliseconds = Math.floor(duration.milliseconds() / 10);
   const pad = (n: any) => (n < 10 ? "0" + n : n);
 
   //distance marking table
@@ -102,9 +102,9 @@ const styles = StyleSheet.create({
     position: "absolute",
   },
   lapContainer: {
-    backgroundColor: "black",
+    backgroundColor: "rgba(0,0,0, 0.8)",
     width: 300,
-    height: 180,
+    height: 250,
     marginLeft: 300,
     position: "absolute",
     // flex: 1,
