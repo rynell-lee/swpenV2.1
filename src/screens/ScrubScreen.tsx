@@ -19,6 +19,7 @@ import {
   ReturnCode,
   FFmpegKitConfig,
 } from "ffmpeg-kit-react-native";
+import BackMarker from "../components/general/Back";
 
 const SCREEN_WIDTH = Dimensions.get("screen").width;
 const SCREEN_HEIGHT = Dimensions.get("screen").height;
@@ -164,6 +165,9 @@ const ScrubScreen = () => {
   };
   return (
     <SafeAreaView style={styles.mainContainer}>
+      <View style={{ width: 60, left: 0 }}>
+        <BackMarker destination={"Review"} />
+      </View>
       {selectedVideo ? (
         <>
           <View style={styles.videoContainer}>
