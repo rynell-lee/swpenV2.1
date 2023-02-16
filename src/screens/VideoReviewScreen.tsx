@@ -19,7 +19,9 @@ type props = {
 };
 const VideoReviewScreen = (props: props) => {
   const navigation = useNavigation<any>();
-  const [video, setVideo] = useState<string>(props.route.params.video.path);
+  const [video, setVideo] = useState<string>(props.route.params.uri);
+  // const lapArray = props.route.params.lapArray;
+  console.log(props.route);
   // const video = props.route.params.video.path; // figure out ltr
 
   const discard = () => {

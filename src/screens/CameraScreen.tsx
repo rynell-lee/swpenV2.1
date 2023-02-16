@@ -136,6 +136,7 @@ const CameraScreen = (props: props) => {
   const [now, setNow] = useState<number>(0);
   const [lapArray, setLapArray] = useState<Array<any>>([]);
   const [timeInterval, setTimeInterval] = useState<any>();
+  const [timeObj, setTimeObj] = useState({});
   //states for marker
   const [i, setI] = useState<number>(0);
   // const [current, setCurrent] = useState<any>();
@@ -217,6 +218,8 @@ const CameraScreen = (props: props) => {
             setStartRace={setStartRace}
             setBreakOut={setBreakOut}
             setLapArray={setLapArray}
+            lapArray={lapArray}
+            timeObj={timeObj}
           />
         </View>
         <View style={styles.distance}>
@@ -240,6 +243,7 @@ const CameraScreen = (props: props) => {
             course={course}
             distance={distance}
             distArray={distArray}
+            setTimeObj={setTimeObj}
           />
           {/* <EndMarker isRecording={isRecording} /> */}
         </View>
