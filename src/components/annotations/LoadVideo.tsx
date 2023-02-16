@@ -42,10 +42,10 @@ const LoadVideo = (props: props) => {
       <TouchableOpacity onPress={pickImage}>
         <MaterialCommunityIcons
           name="rectangle-outline"
-          size={120}
+          size={140}
           color="black"
         />
-        <Text>Load video</Text>
+        <Text style={styles.text}>Load video</Text>
       </TouchableOpacity>
     </View>
   );
@@ -54,9 +54,14 @@ const LoadVideo = (props: props) => {
 const styles = StyleSheet.create({
   load: {
     // position: "absolute",
-    top: 10,
+    // top: 10,
     alignItems: "center",
     // justifyContent: "center",
+  },
+  text: {
+    alignSelf: "center",
+    position: "absolute",
+    top: 62,
   },
 });
 

@@ -12,6 +12,7 @@ import AnnotationScreen from "./src/screens/AnnotationScreen";
 import { Provider } from "./src/context/cameraContext";
 import MdModal2 from "./src/components/metadata/MdModal2";
 import TestScreen from "./src/screens/testScreen";
+import ScrubScreen from "./src/screens/ScrubScreen";
 
 export type RootStackParamList = {
   Home: undefined;
@@ -21,6 +22,7 @@ export type RootStackParamList = {
   Annotation: undefined;
   MdModal2: undefined;
   Test: undefined;
+  Scrub: undefined;
 };
 
 export type NavigatorProps = NativeStackScreenProps<RootStackParamList>;
@@ -53,6 +55,7 @@ export default function RootNavigator() {
           <Stack.Screen name="Annotation" component={AnnotationScreen} />
           <Stack.Screen name="MdModal2" component={MdModal2} />
           <Stack.Screen name="Test" component={TestScreen} />
+          <Stack.Screen name="Scrub" component={ScrubScreen} />
         </Stack.Group>
       </Stack.Navigator>
     </NavigationContainer>

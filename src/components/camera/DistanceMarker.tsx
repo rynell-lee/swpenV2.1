@@ -27,6 +27,7 @@ interface props {
   course: string;
   distance: string;
   distArray: string[];
+  setTimeObj: Function;
 }
 const DistanceMarker = (props: props) => {
   const isRecording = props.isRecording;
@@ -40,6 +41,7 @@ const DistanceMarker = (props: props) => {
   const course = props.course;
   const distance = props.distance;
   const eJson: any = eventJson;
+  const setTimeObj = props.setTimeObj;
   // const distArray = props.distArray;
 
   // console.log(course);
@@ -121,7 +123,7 @@ const DistanceMarker = (props: props) => {
       <TouchableOpacity
         onPress={() => {
           setStartRace(true);
-          startTimer();
+          // startTimer();
           console.log(`Race started`);
           setLapArray([...lapArray, ["Start", timeRecorded]]);
         }}
@@ -148,6 +150,14 @@ const DistanceMarker = (props: props) => {
     );
   };
 
+  const arrToObj = (arr: []) => {
+    const obj = {};
+    arr.forEach((x) => {
+      obj[x[0]] = x[1];
+    });
+    return obj;
+  };
+
   const marker = () => {
     return (
       <View>
@@ -168,7 +178,8 @@ const DistanceMarker = (props: props) => {
             stopTimer();
             setLapArray([...lapArray, ["End", timeRecorded]]);
             console.log(`Race ended`);
-            console.log(lapArray);
+            setTimeObj(arrToObj(lapArray));
+            // console.log(lapArray);
           }}
         >
           <View style={styles.centre}>

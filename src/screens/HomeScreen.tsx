@@ -83,7 +83,7 @@ const HomeScreen = ({ navigation }: NavigatorProps) => {
             color="black"
           />
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("Scrub")}>
           <FontAwesome
             name="newspaper-o"
             size={200}
