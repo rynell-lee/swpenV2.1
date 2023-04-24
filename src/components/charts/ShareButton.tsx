@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import {
   View,
   TouchableOpacity,
@@ -17,14 +17,11 @@ import RNHTMLtoPDF from "react-native-html-to-pdf";
 
 const imageUrl = "https://picsum.photos/200";
 
-const viewShotRef: React.RefObject<ViewShot> = React.createRef();
-
 const isError = (error: unknown): error is Error => {
   return error instanceof Error;
 };
-const TestScreen = () => {
-  // const viewShotRef: React.RefObject<ViewShot> = React.createRef();
-
+const viewShotRef: React.RefObject<ViewShot> = React.createRef();
+const ShareButton = () => {
   const captureScreen = async () => {
     try {
       const uri = await viewShotRef?.current.capture();
@@ -169,27 +166,6 @@ const TestScreen = () => {
     );
   };
 
-  const webViewRef = useRef(null);
-
-  const captureEntireWebView = async () => {
-    if (!webViewRef.current) {
-      console.error("WebView ref not available");
-      return;
-    }
-
-    try {
-      const base64Data = await webViewRef.current.captureSnapshot({
-        format: "png",
-        quality: 1,
-        snapshotContentContainer: false,
-      });
-      console.log("Captured WebView Base64 Data:", base64Data);
-      // Save, share, or do something else with the base64 data here
-    } catch (err) {
-      console.error("Error capturing WebView:", err);
-    }
-  };
-
   return (
     <View style={{ flex: 1 }}>
       <ViewShot
@@ -207,12 +183,7 @@ const TestScreen = () => {
         <TouchableOpacity style={styles.button} onPress={saveToMediaLibrary}>
           <Text style={styles.buttonText}>Save to Media Library</Text>
         </TouchableOpacity>
-        {/* <TouchableOpacity style={styles.button} onPress={shareImage}>
-          <Text style={styles.buttonText}>Share</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={shareImageAsPdf}>
-          <Text>Share Screenshot as PDF</Text>
-        </TouchableOpacity> */}
+
         <TouchableOpacity onPress={showShareOptions} style={styles.button}>
           <Text style={styles.buttonText}>Share Screenshot</Text>
         </TouchableOpacity>
@@ -241,23 +212,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TestScreen;
-
-// const captureEntireScrollableContent = async () => {
-//   if (!scrollViewRef.current || !viewShotRef.current) {
-//     console.error("ScrollView or ViewShot ref not available");
-//     return;
-//   }
-
-//   try {
-//     setScrollViewHeight(undefined);
-//     await new Promise((resolve) => setTimeout(resolve, 100));
-
-//     const path = await viewShotRef?.current.capture();
-
-//     setScrollViewHeight(undefined);
-//     return path;
-//   } catch (err) {
-//     console.error("Error capturing scrollable content:", err);
-//   }
-// };
+export default ShareButton;

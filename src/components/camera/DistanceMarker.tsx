@@ -88,6 +88,14 @@ const DistanceMarker = (props: props) => {
     duration.minutes()
   )}:${pad(duration.seconds())}`;
 
+  const arrToObj = (arr: []) => {
+    const obj = {};
+    arr.forEach((x) => {
+      obj[x[0]] = x[1];
+    });
+    return obj;
+  };
+
   const startTimer = () => {
     const now = new Date().getTime();
     setStart(now);
@@ -142,20 +150,11 @@ const DistanceMarker = (props: props) => {
           changeDistance();
           setLapArray([...lapArray, ["Breakout", timeRecorded]]);
           if (dist != undefined) setCurrent(dist[i]);
-          // reset();
         }}
       >
         <MaterialIcons name="pool" size={80} color="white" />
       </TouchableOpacity>
     );
-  };
-
-  const arrToObj = (arr: []) => {
-    const obj = {};
-    arr.forEach((x) => {
-      obj[x[0]] = x[1];
-    });
-    return obj;
   };
 
   const marker = () => {
@@ -179,6 +178,7 @@ const DistanceMarker = (props: props) => {
             setLapArray([...lapArray, ["End", timeRecorded]]);
             console.log(`Race ended`);
             setTimeObj(arrToObj(lapArray));
+
             // console.log(lapArray);
           }}
         >

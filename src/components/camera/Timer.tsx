@@ -45,13 +45,7 @@ const Timer = (props: props) => {
 
   const LapsTable = () => {
     return (
-      <ScrollView
-        style={styles.lapContainer}
-        onScroll={() => {
-          console.log("scrolling");
-        }}
-        // contentContainerStyle={{ flexGrow: 1 }}
-      >
+      <ScrollView style={styles.lapContainer} onScroll={() => {}}>
         {lapArray.map((item: any[], index) => {
           return <Lap distance={item[0]} interval={item[1]} key={index} />;
         })}
@@ -59,20 +53,7 @@ const Timer = (props: props) => {
     );
   };
 
-  // const LapsTable = () => {
-  //   return (
-  //     <FlatList
-  //       data={lapArray}
-  //       keyExtractor={(item) => item.index}
-  //       renderItem={({ item, index }) => {
-  //         return <Lap distance={item[0]} interval={item[1]} key={index} />;
-  //       }}
-  //       style={styles.lapContainer}
-  //       scrollEnabled={true}
-  //     />
-  //   );
-  // };
-
+  //timer
   const showTimer = () => {
     return (
       <View style={{ flex: 1 }}>
@@ -120,3 +101,16 @@ const styles = StyleSheet.create({
 });
 
 export default Timer;
+// const LapsTable = () => {
+//   return (
+//     <FlatList
+//       data={lapArray}
+//       keyExtractor={(item) => item.index}
+//       renderItem={({ item, index }) => {
+//         return <Lap distance={item[0]} interval={item[1]} key={index} />;
+//       }}
+//       style={styles.lapContainer}
+//       scrollEnabled={true}
+//     />
+//   );
+// };

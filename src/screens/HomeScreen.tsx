@@ -19,6 +19,7 @@ import { FontAwesome5, FontAwesome } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
 import MdModal1 from "../components/metadata/MdModal1";
+import { AntDesign } from "@expo/vector-icons";
 
 const HomeScreen = ({ navigation }: NavigatorProps) => {
   //modal toggling
@@ -45,14 +46,18 @@ const HomeScreen = ({ navigation }: NavigatorProps) => {
     .onStart(() => {
       console.log("tap");
     });
+
+  const data = {
+    csvData: [1, 2, 3],
+  };
   return (
     <View style={styles.view}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scroll}
       >
-        <Text style={styles.headers}>Home Screen</Text>
-        <TouchableOpacity
+        {/* <Text style={styles.headers}>Home Screen</Text> */}
+        {/* <TouchableOpacity
           onPress={() => {
             toggleModal();
             generateDataObj();
@@ -71,37 +76,40 @@ const HomeScreen = ({ navigation }: NavigatorProps) => {
             obj={dataObj}
             navigation={navigation.navigate}
           />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <TouchableOpacity onPress={() => navigation.navigate("Camera")}>
           <Entypo name="video-camera" size={200} color="black" />
+          <Text style={styles.label}>Camera</Text>
         </TouchableOpacity>
+
         <TouchableOpacity onPress={() => navigation.navigate("Annotation")}>
-          <Ionicons
-            name="cloud-sharp"
-            size={200}
-            style={styles.icons}
-            color="black"
-          />
+          <FontAwesome5 name="swimmer" size={200} color="black" />
+          <Text style={styles.label}>Annotation</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate("Scrub")}>
+
+        <TouchableOpacity onPress={() => navigation.navigate("ChartsReview")}>
+          <AntDesign name="linechart" size={200} color="black" />
+          <Text style={styles.label}>Statistics</Text>
+        </TouchableOpacity>
+        {/* <TouchableOpacity onPress={() => navigation.navigate("Scrub")}>
           <FontAwesome
             name="newspaper-o"
             size={200}
             style={styles.icons}
             color="black"
           />
-        </TouchableOpacity>
-        <Button title="Camera" onPress={() => navigation.navigate("Camera")} />
+        </TouchableOpacity> */}
+        {/* <Button title="Camera" onPress={() => navigation.navigate("Camera")} />
         <Button
           title="Loading"
           onPress={() => navigation.navigate("Loading")}
         />
-        <Button title="Test" onPress={() => navigation.navigate("Test")} />
-        <GestureHandlerRootView>
+        <Button title="Test" onPress={() => navigation.navigate("Test")} /> */}
+        {/* <GestureHandlerRootView>
           <GestureDetector gesture={Gesture.Exclusive(singleTap)}>
             <View style={styles.ball} />
           </GestureDetector>
-        </GestureHandlerRootView>
+        </GestureHandlerRootView> */}
       </ScrollView>
     </View>
   );
@@ -116,18 +124,26 @@ const styles = StyleSheet.create({
   },
   view: {
     flex: 1,
+    // flexDirection: "row",
+    // alignItems: "stretch",
   },
   icons: {
     paddingBottom: 100,
   },
   scroll: {
-    justifyContent: "center",
-
-    alignItems: "center",
+    justifyContent: "space-around",
+    flexDirection: "row",
+    // alignItems: "center",
+    paddingTop: 200,
   },
   headers: {
     fontSize: 30,
     paddingBottom: 100,
+  },
+  label: {
+    color: "#333",
+    fontSize: 36,
+    textAlign: "center",
   },
 });
 

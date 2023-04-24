@@ -7,7 +7,7 @@ import { Camera } from "react-native-vision-camera";
 import { Video } from "expo-av";
 import * as MediaLibrary from "expo-media-library";
 import { NavigatorProps } from "../../../App";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // import Video from "react-native-video";
@@ -41,12 +41,8 @@ const RecordButton = (props: props) => {
   const setIsRecording = props.setIsRecording;
   const setStartRace = props.setStartRace;
   const setBreakOut = props.setBreakOut;
-  const [video, setVideo] = useState<string>();
   const timeObj = props.timeObj;
-  // const [timeObj, setTimeObj] = useState({});
 
-  //timer function
-  //will be left here maybe i can use a timer to record total length of video too
   const setStart = props.setStart;
   const setNow = props.setNow;
   const timeInterval = props.timeInterval;
@@ -76,16 +72,26 @@ const RecordButton = (props: props) => {
     setBreakOut(false);
     setI(0);
   };
+  // const test = timeObj;
 
-  const storeTimings = async (data: {}, key: string) => {
-    try {
-      const jsonValue = JSON.stringify(data);
-      await AsyncStorage.setItem(key, jsonValue);
-      // alert("data saved");
-    } catch (e) {
-      // saving error
+  const generateKey = () => {
+    let result = "";
+    const characters =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < 8) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      counter += 1;
     }
+    return result;
   };
+  const [newKey, setNewKey] = useState<string>();
+  const [videoData, setVideoData] = useState<any>({});
+
+  useEffect(() => {
+    setNewKey(generateKey());
+  }, []);
 
   const startRecording = () => {
     setI(0);
@@ -93,14 +99,13 @@ const RecordButton = (props: props) => {
       console.log("Start recording");
       setIsRecording(true);
       startTimer();
-      // console.log(timeObj);
       camera?.startRecording({
         flash: onOrOff,
         onRecordingFinished: (video) => {
-          console.log(video);
-          setVideo(video.path); //video stored here
-          console.log(timeObj);
-          navigation.navigate("Review", { uri: video.path });
+          // data here is on first render
+          console.log("video data:", video);
+          setVideoData(videoData);
+          navigation.navigate("Review", { uri: video.path, key: newKey });
         },
         onRecordingError: (error) => console.error(error),
       });
@@ -117,18 +122,27 @@ const RecordButton = (props: props) => {
     return obj;
   };
 
+  const storeTimings = async (data: {}, key: any) => {
+    try {
+      const jsonValue = JSON.stringify(data);
+      // console.log("storing", jsonValue);
+      await AsyncStorage.setItem(key, jsonValue);
+      // alert("data saved");
+    } catch (e) {
+      // saving error
+    }
+  };
+
   const stopRecording = () => {
     console.log("Stop recording");
-    // console.log(lapArray);
-    // setTimeObj(arrToObj(lapArray));
-    // console.log(timeObj);
-    // storeTimings(timingObj, video?.path)
+    console.log(newKey);
     stopTimer();
     resetMarkers();
     setIsRecording(false);
     setLapArray([]);
+
+    storeTimings(timeObj, newKey);
     camera?.stopRecording();
-    // navigation.navigate("Review", { video });
   };
 
   //find a way to hide settings

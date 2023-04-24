@@ -12,7 +12,7 @@ const BackMarker = (props: props) => {
 
   return (
     <TouchableOpacity onPress={() => navigation.navigate("Home")}>
-      <Ionicons name="arrow-back" size={80} color="white" />
+      <Ionicons name="arrow-back" size={60} color="white" />
     </TouchableOpacity>
   );
 };
