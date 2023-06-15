@@ -1,150 +1,223 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { View, Button, Image, StyleSheet, Text } from "react-native";
 import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  ScrollView,
-  FlatList,
-} from "react-native";
-import moment from "moment";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+  FFmpegKit,
+  FFmpegKitConfig,
+  FFmpegSession,
+  ReturnCode,
+} from "ffmpeg-kit-react-native";
+import RNFS from "react-native-fs";
+import FFmpegWrapper from "../components/annotations/Ffmpeg";
 
-interface lap {
-  distance: number;
-  interval: any;
+function executeFFmpegCommand(
+  command: string,
+  callback: (arg0: FFmpegSession | null) => void
+) {
+  FFmpegKit.execute(command)
+    .then((execution) => {
+      callback(execution);
+    })
+    .catch((error) => {
+      console.error(error);
+      callback(null);
+    });
 }
-const TestScreen = () => {
-  const [start, setStart] = useState<any>(0);
-  const [now, setNow] = useState<any>(0);
-  const [lapArray, setLapArray] = useState<Array<any>>([]);
-  const [timeInterval, setTimeInterval] = useState<any>();
-  const timer = now - start;
-  const duration = moment.duration(timer);
-  const seconds = Math.floor(duration.seconds() / 10);
-  const pad = (n: any) => (n < 10 ? "0" + n : n);
 
-  const startTimer = () => {
-    const now = new Date().getTime();
-    setStart(now);
-    setNow(now);
-    setTimeInterval(
-      setInterval(() => {
-        setNow(new Date().getTime());
-      }, 100)
+async function extractFrames(inputPath: string, frameRate: number) {
+  const outputPattern = "output_frame_%04d.png";
+  const outputPath = RNFS.CachesDirectoryPath + "/" + outputPattern;
+
+  try {
+    const command = `-i ${inputPath} -vf fps=${frameRate} -vsync 0 ${outputPath}`;
+    // const execution: any = await FFmpegKit.execute(command);
+
+    FFmpegKit.executeAsync(
+      command,
+      async (session) => {
+        const state = FFmpegKitConfig.sessionStateToString(
+          await session.getState()
+        );
+        const returnCode = await session.getReturnCode();
+        const failStackTrace = await session.getFailStackTrace();
+        const duration = await session.getDuration();
+
+        if (ReturnCode.isSuccess(returnCode)) {
+          console.log(
+            `Encode completed successfully in ${duration} milliseconds;.`
+          );
+          // console.log(`Check at ${outputImagePath}`);
+          // successCallback(outputImagePath);
+          const frameFiles = await RNFS.readdir(RNFS.CachesDirectoryPath);
+          const frames: any = [];
+          // console.log("data", frames);
+
+          for (const file of frameFiles) {
+            if (file.startsWith("output_frame_")) {
+              const frameData = await RNFS.readFile(
+                RNFS.CachesDirectoryPath + "/" + file,
+                "base64"
+              );
+              frames.push(`data:image/png;base64,${frameData}`);
+            }
+          }
+          console.log("data", frames);
+
+          return frames;
+        } else {
+          console.log("Encode failed. Please check log for the details.");
+
+          // errorCallback();
+        }
+      },
+      (log) => {
+        console.log(log.getMessage());
+      },
+      (statistics) => {
+        console.log(statistics);
+      }
+    ).then((session) =>
+      console.log(
+        `Async FFmpeg process started with sessionId ${session.getSessionId()}.`
+      )
     );
-    // return stopwatch;
+    //new code
+    // let executionResult: any = await new Promise<void>((resolve) => {
+    //   executeFFmpegCommand(command, (execution) => {
+    //     executionResult = execution;
+    //     // console.log("exectuion", execution);
+    //     resolve();
+    //   });
+    // });
+    //
+    // if (
+    //   executionResult &&
+    //   executionResult.getReturnCode() === 0
+    //   // execution.getReturnCode() !== undefined
+    // ) {
+    //   const frameFiles = await RNFS.readdir(RNFS.CachesDirectoryPath);
+    //   const frames: any = [];
+    //   console.log("data", frames);
+
+    //   for (const file of frameFiles) {
+    //     if (file.startsWith("output_frame_")) {
+    //       const frameData = await RNFS.readFile(
+    //         RNFS.CachesDirectoryPath + "/" + file,
+    //         "base64"
+    //       );
+    //       frames.push(`data:image/png;base64,${frameData}`);
+    //     }
+    //   }
+    //   console.log("data", frames);
+
+    //   return frames;
+    // } else {
+    //   throw new Error(
+    //     `FFmpeg execution failed with return code: ${
+    //       executionResult ? executionResult.returnCode : "undefined"
+    //     }`
+    //   );
+    // }
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+}
+
+const ImageGallery = ({ images }: any) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
   };
 
-  const stopTimer = () => {
-    clearInterval(timeInterval);
-    setStart(0);
-    setNow(0);
-  };
-
-  const Lap = ({ distance, interval }: lap) => {
-    return (
-      <View style={styles.lap}>
-        <Text style={styles.text}>{distance}</Text>
-        <Text style={styles.text}>{interval}</Text>
-      </View>
+  const handlePreviousImage = () => {
+    setCurrentImageIndex(
+      (prevIndex) => (prevIndex - 1 + images.length) % images.length
     );
   };
 
-  const LapsTable = () => {
-    return (
-      <ScrollView
-        style={styles.lapContainer}
-        onScroll={() => {
-          console.log("scrolling");
-        }}
-      >
-        {lapArray.map((item: any[], index) => {
-          return <Lap distance={item[0]} interval={item[1]} key={index} />;
-        })}
-      </ScrollView>
-    );
-  };
-
-  // const LapsTable = () => {
-  //   return (
-  //     <FlatList
-  //       data={lapArray}
-  //       keyExtractor={(item) => item.index}
-  //       renderItem={({ item, index }) => {
-  //         return <Lap distance={item[0]} interval={item[1]} key={index} />;
-  //       }}
-  //       style={styles.lapContainer}
-  //       scrollEnabled={true}
-  //     />
-  //   );
-  // };
   return (
     <View>
-      <GestureHandlerRootView>
-        <View style={styles.container}>
-          <Text style={styles.text}>
-            {pad(duration.hours())}:{pad(duration.minutes())}:
-            {pad(duration.seconds())}
-          </Text>
-          <TouchableOpacity style={styles.button} onPress={startTimer}>
-            <Text style={styles.text}>Start</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={stopTimer}>
-            <Text style={styles.text}>Stop</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => {
-              setLapArray([...lapArray, [40, 4]]);
-              // console.log(lapArray);
-            }}
-          >
-            <Text style={styles.text}>Lap</Text>
-          </TouchableOpacity>
-        </View>
-      </GestureHandlerRootView>
-      <LapsTable />
+      <Image
+        source={{ uri: images[currentImageIndex] }}
+        style={{ width: 300, height: 300 }}
+      />
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          marginTop: 10,
+        }}
+      >
+        <Button
+          title="Previous"
+          onPress={handlePreviousImage}
+          disabled={currentImageIndex === 0}
+        />
+        <Button
+          title="Next"
+          onPress={handleNextImage}
+          disabled={currentImageIndex === images.length - 1}
+        />
+      </View>
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  text: {
-    color: "black",
-    fontSize: 30,
-    // position: "absolute",
-    // paddingTop: 10,
-    // backgroundColor: "black",
-  },
-  container: {
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0, 0.5)",
-    width: 150,
-    height: 50,
-    // flex: 1,
-    position: "absolute",
-  },
-  button: {
-    // right: 300,
-  },
-  lapContainer: {
-    // alignItems: "center",
-    backgroundColor: "rgba(0,0,0, 0.5)",
-    width: 500,
-    height: 600,
-    flex: 1,
-    position: "absolute",
-    alignSelf: "flex-end",
-  },
-  lap: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    borderColor: "black",
-    borderBottomWidth: 1,
-    width: 500,
-    height: 40,
-  },
-});
+const FrameExtractor = () => {
+  const [images, setImages] = useState([]);
+  const uri =
+    "file:///data/user/0/com.ssi.swpencamera/cache/VisionCamera-20230329_0338019084713904147356316.mp4";
 
-export default TestScreen;
+  const uri2 =
+    "file:///data/user/0/com.ssi.swpencamera/cache/ImagePicker/16e3f33b-a6af-4704-84f1-7c755a6b2946.mp4";
+
+  const handleExtractFrames = async () => {
+    // const extractedImages: any = await extractFrames(uri2, 30);
+    extractFrames(uri2, 30)
+      .then((data: any) => {
+        setImages(data);
+        // console.log("images length", images.length);
+      })
+      .then(() => {
+        console.log("images length", images.length);
+      })
+      .catch((err) => console.log(err));
+    // console.log("images length", extractedImages.length);
+    // setImages(extractedImages);
+
+    return <Text>Done</Text>;
+  };
+
+  // extractFrames(uri, 30);
+
+  // FFmpegKit.execute(
+  //   `-i ${uri} -vf "select=eq(n\, 30)" -vsync 0 output_frame_%04d.png`
+  // )
+  //   .then(async (session) => {
+  //     const returnCode = await session.getReturnCode();
+  //     const logs = await session.getLogs();
+  //     // console.log(session);
+  //     console.log(returnCode);
+  //   })
+  //   .catch((err) => console.log(err));
+  return (
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      {/* {images.length > 0 ? (
+        <ImageGallery images={images} />
+      ) : (
+        <Button title="Extract Frames" onPress={handleExtractFrames} />
+        // <Text>hello</Text>
+      )}
+      <ImageGallery /> */}
+      <Button title="Extract Frames" onPress={handleExtractFrames} />
+      {/* {images.length > 0 ? <ImageGallery images={images} /> : null} */}
+    </View>
+  );
+};
+
+export default FrameExtractor;
+
+// "file:///data/user/0/com.ssi.swpencamera/cache/VisionCamera-20230329_0338019084713904147356316.mp4",
+
+//ffmpeg -i input_video.mp4 -vf "select=eq(n\,frame_number)" -vsync 0 output_frame_%04d.png

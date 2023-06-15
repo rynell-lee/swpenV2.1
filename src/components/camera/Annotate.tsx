@@ -8,7 +8,7 @@ interface props {
   isRecording: Boolean;
 }
 
-//code to go back to home screen
+//function to return to home screen
 const ExitMarker = (props: props) => {
   const isRecording = props.isRecording;
   const navigation = useNavigation<any>();

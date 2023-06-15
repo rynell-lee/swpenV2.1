@@ -1,0 +1,1 @@
+this folder contains code for various components used in the camera screen

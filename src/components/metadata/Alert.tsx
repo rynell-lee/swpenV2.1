@@ -1,6 +1,7 @@
 import React from "react";
 import { View, StyleSheet, Button, Alert } from "react-native";
 
+//alerts users
 const showAlert = () =>
   Alert.alert(
     "Invalid entries!",
@@ -14,20 +15,8 @@ const showAlert = () =>
     ],
     {
       cancelable: true,
-      //   onDismiss: () =>
-      //     Alert.alert(
-      //       "This alert was dismissed by tapping outside of the alert dialog."
-      //     ),
     }
   );
-
-// const AlertMessage = () => {
-//   return (
-//     // <View style={styles.container}>
-//     <Button title="Show alert" onPress={showAlert} />
-//     // </View>
-//   );
-// };
 
 const styles = StyleSheet.create({
   container: {

@@ -6,13 +6,15 @@ import { useNavigation } from "@react-navigation/native";
 interface props {
   destination: String;
 }
+
+//code to go back to home screen
 const BackMarker = (props: props) => {
   const navigation = useNavigation<any>();
   //   const destination = props.destination;
 
   return (
     <TouchableOpacity onPress={() => navigation.navigate("Home")}>
-      <Ionicons name="arrow-back" size={80} color="white" />
+      <Ionicons name="arrow-back" size={60} color="white" />
     </TouchableOpacity>
   );
 };

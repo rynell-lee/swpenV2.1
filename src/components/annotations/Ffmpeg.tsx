@@ -1,3 +1,6 @@
+//not in use for the main code
+//this code is used to break the video into multiple frames, currently encountering errors
+//for future work, please refere to ffmpeg-kit-react-native docs
 import {
   FFmpegKit,
   FFmpegKitConfig,
@@ -5,7 +8,7 @@ import {
 } from "ffmpeg-kit-react-native";
 import RNFS from "react-native-fs";
 
-import { FRAME_PER_SEC, FRAME_WIDTH } from "../screens/ScrubScreen";
+import { FRAME_PER_SEC, FRAME_WIDTH } from "../../screens/testscreen2";
 
 class FFmpegWrapper {
   static getFrames(
@@ -15,8 +18,11 @@ class FFmpegWrapper {
     successCallback: (arg0: string) => void
     // errorCallback: () => void
   ) {
-    let outputImagePath = `${RNFS.CachesDirectoryPath}/${localFileName}_%4d.png`;
-    const ffmpegCommand = `-ss 0 -i ${videoURI} -g 1 -vf "fps=1,scale=${FRAME_WIDTH}:-2" -vframes  ${frameNumber} ${outputImagePath}`;
+    const outputPattern = "output_frame_%04d.png";
+    const outputPath = RNFS.CachesDirectoryPath + "/" + outputPattern;
+    // let outputImagePath = `${RNFS.CachesDirectoryPath}/${localFileName}_%4d.png`;
+    // const command = `-i ${inputPath} -vf fps=${frameRate} -vsync 0 ${outputPath}`;
+    const ffmpegCommand = `-ss 0 -i ${videoURI} -vf "fps=${FRAME_PER_SEC}/1:round=up,scale=${FRAME_WIDTH}:-2" -vframes ${frameNumber} ${outputPath}`;
 
     FFmpegKit.executeAsync(
       ffmpegCommand,
@@ -32,13 +38,15 @@ class FFmpegWrapper {
           console.log(
             `Encode completed successfully in ${duration} milliseconds;.`
           );
-          console.log(`Check at ${outputImagePath}`);
-          successCallback(outputImagePath);
+          console.log(`Check at ${outputPath}`);
+          successCallback(outputPath);
         } else {
           console.log("Encode failed. Please check log for the details.");
-          console.log(
-            `Encode failed with state ${state} and rc ${returnCode}.${failStackTrace}`
-          );
+          //   console.log(
+          //     `Encode failed with state ${state} and rc ${returnCode}.${
+          //       (failStackTrace, '\\n')
+          //     }`,
+          //   );
           //   errorCallback();
         }
       },
