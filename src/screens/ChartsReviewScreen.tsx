@@ -1,3 +1,4 @@
+//this is differnet from the other chart screen, this page is for users to upload own csv to be displayed on screen
 import React, { useState, useEffect, useRef } from "react";
 import {
   Text,
@@ -9,11 +10,7 @@ import {
   ScrollView,
   Platform,
 } from "react-native";
-import {
-  NavigationContainer,
-  RouteProp,
-  useNavigation,
-} from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import BarCharts from "../components/charts/BarChart";
 import MyTable from "../components/charts/Table";
 import LineCharts from "../components/charts/LineChart";
@@ -21,18 +18,9 @@ import ViewShot, { CaptureOptions } from "react-native-view-shot";
 import {
   viewShotRef,
   showShareOptions,
-  saveToMediaLibrary,
-  saveObjectAsCSV,
+  readCSVFromLocal,
 } from "../components/charts/sharingFunctions";
-import RNFS from "react-native-fs";
 import Metadata from "../components/charts/Metadata";
-import Modal from "react-native-modal";
-import DocumentPicker, {
-  DocumentPickerResponse,
-} from "react-native-document-picker";
-
-//@ts-ignore
-import Papa from "papaparse";
 
 interface CsvData {
   table: string[];
@@ -43,62 +31,6 @@ interface CsvData {
 interface CsvObject {
   [key: string]: CsvData;
 }
-
-const readCSVFromLocal = async () => {
-  try {
-    const res = await DocumentPicker.pick({
-      type: [DocumentPicker.types.allFiles],
-      //   copyTo: "cachesDirectory",
-    });
-    // console.log(res);
-
-    const fileContent = await RNFS.readFile(res[0].uri, "utf8");
-    const lines = fileContent.split("\n");
-    const result: any = {};
-    let currentObj: any;
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (line) {
-        if (
-          line === "DT" ||
-          line === "VD" ||
-          line === "SR" ||
-          line === "SC" ||
-          line === "DPS"
-        ) {
-          currentObj = {
-            table: [],
-            x: [],
-            y: [],
-          };
-          result[line] = currentObj;
-        } else {
-          const values = line.split(",");
-          currentObj.table.push([values[0], values[1]]);
-          currentObj.x.push(parseFloat(values[2]));
-          currentObj.y.push(parseFloat(values[3]));
-        }
-      }
-    }
-
-    // Remove the first element of each array
-    for (const key in result) {
-      if (result.hasOwnProperty(key)) {
-        result[key].table = result[key].table.slice(1);
-        result[key].x = result[key].x.slice(1);
-        result[key].y = result[key].y.slice(1);
-      }
-    }
-    // console.log(result);
-    return result;
-  } catch (err) {
-    console.log(err);
-  }
-};
-// const handleLoadCSV = async () => {
-//   const myCSVData = await readCSVFromLocal();
-//   return myCSVData
-// };
 
 //convert string to seconds
 const timeToSeconds = (timeString: string): number => {
@@ -239,22 +171,16 @@ const getDPS = (vel: any, srSec: any) => {
 
 const ChartsReviewScreen = ({ route }: any) => {
   const navigation = useNavigation<any>();
+  const [metadata, setMetadata] = useState<any>();
   //   const { strokes, laps } = route.params;
-  const testStrokes = {
-    //take note
-    "15M": 10,
-    "20M": 9,
-    "25M": 6,
-    "40M": 7,
-    "45M": 7,
-    "50M": 6,
-  };
+
   const [csv, setCsv] = useState<any>();
   const handleLoadCSV = async () => {
     const myCSVData = await readCSVFromLocal();
     setCsv(myCSVData);
   };
 
+  //decalring variables so that they can be used to read csv data
   let xValues;
   let yValues;
   let newArray;
@@ -275,18 +201,13 @@ const ChartsReviewScreen = ({ route }: any) => {
     newArray = csv.DT.table;
     console.log(newArray);
 
-    //x values: distances, y values: time in seconds
-    //vdx: distance range, vdy: velocity
     VDarr = csv.VD.table;
     vdX = csv.VD.x;
     vdY = csv.VD.y;
     //stroke rate table: VDarr but no 0M - first distance, chart: vdx without 0-first, yvalue new calculation
     srY = csv.SR.y;
-    //  srArr = VDarr.slice(1)// arr
     srArr = csv.SR.table;
     srX = csv.SR.x;
-    //  console.log(srArr);
-    // console.log(srY);
 
     //stroke count: x-distance, y-count. table: VDAarr.slice + SC (usec combineArr), chart: srX, SCY (to build)
     scY = csv.SC.y;
@@ -298,26 +219,19 @@ const ChartsReviewScreen = ({ route }: any) => {
     dpsArr = csv.DPS.table;
   }
 
-  // const obj = {
-  //   DT: {
-  //     table: [1, 2, 3],
-  //     x: [4, 5, 6],
-  //     y: [7, 8, 9],
-  //   },
-  //   VD: {
-  //     table: [3, 2, 1],
-  //     x: [6, 5, 4],
-  //     y: [9, 8, 7],
-  //   },
-  // };
-  return (
-    // <View>
-    //   <Text>new charts</Text>
-    //   <Button title="check data" onPress={handleLoadCSV} />
-    // </View>
+  //metadata questionaire
+  const [showQuestionnaire, setShowQuestionnaire] = useState(false);
 
+  const handleShowQuestionnaire = () => {
+    setShowQuestionnaire(true);
+  };
+
+  const handleCloseQuestionnaire = () => {
+    setShowQuestionnaire(false);
+  };
+
+  return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
-      {/* <Button title="check data" onPress={handleLoadCSV} /> */}
       {csv === undefined ? null : (
         <ScrollView style={{ backgroundColor: "white" }}>
           <ViewShot
@@ -411,49 +325,42 @@ const ChartsReviewScreen = ({ route }: any) => {
               />
             </View>
 
-            {/* <BarCharts data={newDataObj} /> */}
+            {metadata ? (
+              <>
+                <View style={styles.containerSection}>
+                  <Text style={styles.titleSection}>Event Details</Text>
+                </View>
+                <View style={styles.DTchart}>
+                  <MyTable data={metadata} headers={["Details"]} />
+                </View>
+                <View style={styles.blank}></View>
+              </>
+            ) : null}
           </ViewShot>
         </ScrollView>
       )}
 
       <View style={styles.buttonContainer}>
-        {/* <TouchableOpacity style={styles.button} onPress={saveToMediaLibrary}>
-          <Text style={styles.buttonText}>Save to Media Library</Text>
-        </TouchableOpacity> */}
         <TouchableOpacity onPress={showShareOptions} style={styles.button}>
           <Text style={styles.buttonText}>Share</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleLoadCSV} style={styles.button}>
           <Text style={styles.buttonText}>Load CSV data</Text>
         </TouchableOpacity>
-        {/* <TouchableOpacity
-          onPress={() => saveObjectAsCSV(csvData)}
-          style={styles.button}
-        >
-          <Text style={styles.buttonText}>Export as CSV</Text>
-        </TouchableOpacity> */}
-        {/* <TouchableOpacity
+
+        <TouchableOpacity
           onPress={handleShowQuestionnaire}
           style={styles.button}
         >
-          <Text style={styles.buttonText}>Metadata</Text> */}
-        {/* <Metadata
-            visible={showQuestionnaire}
-            onClose={handleCloseQuestionnaire}
-          /> */}
-        {/* </TouchableOpacity> */}
-      </View>
-      {/* <Modal
-        isVisible={showQuestionnaire}
-        onBackdropPress={handleCloseQuestionnaire}
-        backdropColor="#f5f5f5"
-        backdropOpacity={0.1}
-      >
+          <Text style={styles.buttonText}>Metadata</Text>
+        </TouchableOpacity>
+
         <Metadata
           isVisible={showQuestionnaire}
           onClose={handleCloseQuestionnaire}
+          setMetadata={setMetadata}
         />
-      </Modal> */}
+      </View>
     </View>
   );
 };
@@ -463,11 +370,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
+  blank: {
+    height: 150,
+  },
+
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 10,
   },
   button: {
     backgroundColor: "#4b7bec",

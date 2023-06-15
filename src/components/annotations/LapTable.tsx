@@ -1,10 +1,5 @@
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  ReactNode,
-  forwardRef,
-} from "react";
+//same laptable as all the other lap tables, this code is used to display the lap table on the screen
+import React, { ReactNode, forwardRef } from "react";
 import {
   Text,
   View,

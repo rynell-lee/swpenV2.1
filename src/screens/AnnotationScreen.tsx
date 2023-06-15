@@ -1,23 +1,13 @@
+// code for annotation screen
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import {
-  Text,
-  View,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  Button,
-} from "react-native";
+import { Text, View, TouchableOpacity, StyleSheet } from "react-native";
 import BackMarker from "../components/general/Back";
-import { Video } from "expo-av";
 import LoadVideo from "../components/annotations/LoadVideo";
 // @ts-ignore
-import VideoPlayer from "react-native-video-controls";
-import MediaControls, { PLAYER_STATES } from "react-native-media-controls";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LapTable from "../components/annotations/LapTable";
 import LineTool from "../components/annotations/LineTool";
 //@ts-ignore
-import { debounce } from "lodash";
 import CustomVideoPlayer from "../components/annotations/CustomVideoPlayer";
 import StrokeCounter from "../components/annotations/StrokeCounter";
 import { useNavigation } from "@react-navigation/native";
@@ -31,9 +21,7 @@ const AnnotationScreen = (props: props) => {
   const navigation = useNavigation<any>();
 
   const videoRef = useRef(null);
-  // const video = props.video;
   const [videoUri, setVideoUri] = useState<string>("");
-  // const [videoDuration, setVideoDuration] = useState<number>()
   const [id, setId] = useState<string>();
   const [laps, setLaps] = useState<any>();
   const [showLine, setShowLine] = useState<boolean>(false);
@@ -46,7 +34,7 @@ const AnnotationScreen = (props: props) => {
   const [strokes, setStrokes] = useState(0);
   const [strokeObj, setStrokeObj] = useState<object>({});
 
-  //process the lap object
+  //process the lap object, basically destructuring the code from camera screen
   const formatObj = (obj: any) => {
     let arr = [];
     for (const marker in obj) {
@@ -56,7 +44,6 @@ const AnnotationScreen = (props: props) => {
       arr.push(newObj);
     }
     const length = arr.length;
-    // return [arr[length - 1], arr[length - 2], ...arr].splice(0, length);
     return arr;
   };
 
@@ -69,16 +56,11 @@ const AnnotationScreen = (props: props) => {
   };
 
   //toggle line
-
   const toggleLine = () => {
     setShowLine(!showLine);
   };
 
-  // how
-  // console.log(props.route);
-
-  //
-
+  // this function is used to read data saved in asyncstorage
   const getData = async (key: any) => {
     try {
       const jsonValue = await AsyncStorage.getItem(`${key}`);
@@ -90,6 +72,7 @@ const AnnotationScreen = (props: props) => {
     }
   };
 
+  //code not in use, was intitally used for scrubbing purposes
   const onProgress = (data: { currentTime: React.SetStateAction<number> }) => {
     if (!isSeeking) {
       setCurrentTime(data.currentTime);
@@ -106,6 +89,7 @@ const AnnotationScreen = (props: props) => {
     console.log("Scrubber moved to:", currentTime);
   };
 
+  //function to format time on screen
   const timeFormat = (time: number) => {
     const hours = Math.floor(time / 3600);
     const minutes = Math.floor((time % 3600) / 60);
@@ -118,21 +102,9 @@ const AnnotationScreen = (props: props) => {
     return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
   };
 
-  // const onSeek = (data: { seekTime: React.SetStateAction<number> }) => {
-  //   // setCurrentTime(data.seekTime);
-  //   console.log("scrubber moved to:", data.seekTime);
-  //   // setIsPlaying(true);
-  // };
-
+  //refer to component files for code
   return (
     <View style={styles.background}>
-      {/* <Video
-        style={styles.video}
-        source={{ uri: video }}
-        // useNativeControls
-        // resizeMode="contain"
-        // isLooping
-      /> */}
       {videoUri != "" ? (
         <CustomVideoPlayer
           videoUri={videoUri}
@@ -146,42 +118,12 @@ const AnnotationScreen = (props: props) => {
           setJustJumped={setJustJumped}
           ref={videoRef}
         />
-      ) : // <VideoPlayer
-      //   ref={videoRef}
-      //   source={{ uri: videoUri }}
-      //   disableBack={true}
-      //   disableFullscreen={true}
-      //   style={styles.video}
-      //   videoStyle={styles.videoOnly}
-      //   scrubbing={10}
-      //   seekColor={"red"}
-      //   useTextureView={true}r
-      //   // controlAnimationTiming={}
-      //   // controlTimeout={10000}
-      //   onProgress={onProgress}
-      //   seekStart={onSeekStart}
-      //   seekEnd={onSeekEnd}
-      //   // progressUpdateInterval={10}
-      //   // seek={value}
-      //   paused={isPlaying}
-      //   // setCurrentTime={value}
-      //   // onSeek={onSeek}
-      //   // onSlidingComplete={onSeek}
-      // />
-      null}
-      {/* <View style={styles.back}>
-        <BackMarker destination={"Review"} />
-      </View> */}
+      ) : null}
+
       <View style={styles.panel}>
         <BackMarker destination={"Review"} />
         <LoadVideo setVideo={setVideoUri} uri={videoUri} setLaps={setLaps} />
-        {/* <Button title="Charts" onPress={() => navigation.navigate("Chart")} /> */}
-        {/* <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate("Chart", chartData)}
-        >
-          <Text style={styles.buttonText}>Chart</Text>
-        </TouchableOpacity> */}
+
         <TouchableOpacity
           style={styles.buttonLine}
           onPress={() => {
@@ -198,6 +140,7 @@ const AnnotationScreen = (props: props) => {
             setStrokes={setStrokes}
             strokeObj={strokeObj}
             setStrokeObject={setStrokeObj}
+            currentTime={currentTime}
           />
         </View>
         <View style={styles.table}>
@@ -214,13 +157,6 @@ const AnnotationScreen = (props: props) => {
           ) : null}
         </View>
 
-        {/* <Button
-          title="Line tool"
-          onPress={() => {
-            toggleLine();
-            console.log("line");
-          }}
-        /> */}
         <View style={styles.refine}>
           <TouchableOpacity
             style={styles.buttonRefine}
@@ -230,22 +166,13 @@ const AnnotationScreen = (props: props) => {
               console.log(laps);
               setLaps(laps);
               console.log(currentTime.toFixed(0));
+              console.log(lapData);
             }}
           >
             <Text
               style={styles.buttonText}
             >{`Refine timestamp: ${distance}`}</Text>
           </TouchableOpacity>
-          {/* <Button
-            title={`Refine timestamp: ${distance}`}
-            onPress={() => {
-              // console.log(123);
-              laps[distance] = timeFormat(sliderValue);
-              console.log(laps);
-              setLaps(laps);
-              console.log(currentTime.toFixed(0));
-            }}
-          /> */}
         </View>
         <TouchableOpacity
           style={styles.button}
@@ -253,25 +180,8 @@ const AnnotationScreen = (props: props) => {
         >
           <Text style={styles.buttonText}>Statistics</Text>
         </TouchableOpacity>
-        {/* <TouchableOpacity
-          onPress={() => {
-            console.log(123);
-          }}
-        >
-          <Text style={styles.refine}>Refine timestamp: {distance}</Text>
-        </TouchableOpacity> */}
       </View>
       <View style={styles.line}>{showLine ? <LineTool /> : null}</View>
-
-      {/* <View style={styles.test}>
-        <Button
-          title={"check data"}
-          onPress={() => {
-            getData(id).then((data) => setData(data));
-            console.log(data);
-          }}
-        />
-      </View> */}
     </View>
   );
 };
@@ -324,7 +234,7 @@ const styles = StyleSheet.create({
     // flex: 1,
   },
   refine: {
-    top: 160,
+    top: 115,
     // borderColor: "black",
     // borderWidth: 1,
     // // fontSize: 18,
@@ -347,7 +257,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 5,
     // position: "absolute",
-    marginTop: 180,
+    marginTop: 125,
     bottom: 80,
     right: 20,
     left: 2,
@@ -358,7 +268,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 5,
     // position: "absolute",
-    bottom: 80,
+    bottom: 100,
     right: 20,
     left: 2,
   },
@@ -378,10 +288,10 @@ const styles = StyleSheet.create({
     marginTop: 80,
   },
   counter: {
-    bottom: 80,
+    bottom: 120,
   },
   table: {
-    bottom: 80,
+    bottom: 130,
   },
 });
 export default AnnotationScreen;

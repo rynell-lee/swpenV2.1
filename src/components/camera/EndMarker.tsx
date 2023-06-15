@@ -5,6 +5,8 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 interface props {
   isRecording: Boolean;
 }
+
+//function to end the swimming race BUT not the video
 const EndMarker = (props: props) => {
   const isRecording = props.isRecording;
 

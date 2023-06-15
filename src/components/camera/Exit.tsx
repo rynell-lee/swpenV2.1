@@ -7,6 +7,8 @@ import { View } from "native-base";
 interface props {
   isRecording: Boolean;
 }
+
+//code to go back to home screen
 const ExitMarker = (props: props) => {
   const isRecording = props.isRecording;
   const navigation = useNavigation<any>();

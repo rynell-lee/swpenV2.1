@@ -1,3 +1,4 @@
+//this file is full of exported functions used for charts screen
 import React, { useEffect, useRef, useState } from "react";
 import {
   View,
@@ -12,10 +13,12 @@ import ViewShot, { captureRef } from "react-native-view-shot";
 import RNFS from "react-native-fs";
 import Share from "react-native-share";
 import * as MediaLibrary from "expo-media-library";
-import * as FileSystem from "expo-file-system";
 //@ts-ignore
 import RNHTMLtoPDF from "react-native-html-to-pdf";
 import { showMessage } from "react-native-flash-message";
+import DocumentPicker, {
+  DocumentPickerResponse,
+} from "react-native-document-picker";
 
 export const viewShotRef: React.RefObject<ViewShot> = React.createRef();
 
@@ -128,6 +131,7 @@ const captureScrollView = async () => {
   }
 };
 
+//cfunction to covert image to pdf
 const convertToPDF = (x: any) => {
   const html = `
   <!DOCTYPE html>
@@ -164,6 +168,7 @@ const convertToPDF = (x: any) => {
   return html;
 };
 
+//below are functions to save as pdf
 const saveImageAsPdf = async () => {
   if (!viewShotRef.current) {
     console.error("ViewShot ref not available");
@@ -300,6 +305,7 @@ export const showShareOptions = () => {
   );
 };
 
+//function to generate a unqie name for the csv, it will be based of the date and time
 const generateCSVName = (): string => {
   const currentDate = new Date();
   const year = currentDate.getFullYear().toString();
@@ -328,8 +334,6 @@ export const saveObjectAsCSV = async (myObject: MyObject) => {
   }
 
   try {
-    // const csvPath = `${RNFS.ExternalStorageDirectoryPath}/Documents/swimmPen.csv`;
-    // const csvPath = pdfPath.replace('.pdf', '.csv')
     const csvName = generateCSVName();
     const csvPath = `${RNFS.ExternalStorageDirectoryPath}/Documents/${csvName}`;
 
@@ -361,4 +365,55 @@ interface MyObject {
   [key: string]: TableData;
 }
 
-// const myObject: MyObject = { name: "John", age: 25, city: "New York" };
+//function to read local csv files, note that csv has a specific format, else code will not work
+export const readCSVFromLocal = async () => {
+  try {
+    const res = await DocumentPicker.pick({
+      type: [DocumentPicker.types.allFiles],
+      //   copyTo: "cachesDirectory",
+    });
+    // console.log(res);
+
+    const fileContent = await RNFS.readFile(res[0].uri, "utf8");
+    const lines = fileContent.split("\n");
+    const result: any = {};
+    let currentObj: any;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (line) {
+        if (
+          line === "DT" ||
+          line === "VD" ||
+          line === "SR" ||
+          line === "SC" ||
+          line === "DPS"
+        ) {
+          currentObj = {
+            table: [],
+            x: [],
+            y: [],
+          };
+          result[line] = currentObj;
+        } else {
+          const values = line.split(",");
+          currentObj.table.push([values[0], values[1]]);
+          currentObj.x.push(parseFloat(values[2]));
+          currentObj.y.push(parseFloat(values[3]));
+        }
+      }
+    }
+
+    // Remove the first element of each array
+    for (const key in result) {
+      if (result.hasOwnProperty(key)) {
+        result[key].table = result[key].table.slice(1);
+        result[key].x = result[key].x.slice(1);
+        result[key].y = result[key].y.slice(1);
+      }
+    }
+    // console.log(result);
+    return result;
+  } catch (err) {
+    console.log(err);
+  }
+};

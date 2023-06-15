@@ -12,11 +12,11 @@ import AnnotationScreen from "./src/screens/AnnotationScreen";
 import { Provider } from "./src/context/cameraContext";
 import MdModal2 from "./src/components/metadata/MdModal2";
 import TestScreen from "./src/screens/testScreen";
-import ScrubScreen from "./src/screens/ScrubScreen";
 import AnnotationTest from "./src/screens/AnnotationTest";
 import Line from "./src/screens/testLine";
 import ChartScreen from "./src/screens/ChartScreen";
 import ChartsReviewScreen from "./src/screens/ChartsReviewScreen";
+import Testscreen2 from "./src/screens/testscreen2";
 
 export type RootStackParamList = {
   Home: undefined;
@@ -31,6 +31,7 @@ export type RootStackParamList = {
   Line: undefined;
   Chart: undefined;
   ChartsReview: undefined;
+  Test2: undefined;
 };
 
 export type NavigatorProps = NativeStackScreenProps<RootStackParamList>;

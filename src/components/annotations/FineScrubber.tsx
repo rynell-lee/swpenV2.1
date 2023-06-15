@@ -1,3 +1,4 @@
+//attempt at building a fine scrubbing slider, not working hence not in use
 import React, { useState, useRef } from "react";
 import { View, StyleSheet, Text } from "react-native";
 import Video from "react-native-video";

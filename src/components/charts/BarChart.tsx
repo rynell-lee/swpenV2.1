@@ -1,3 +1,5 @@
+//code for bar charts, NOT IN USE
+// refer to react-native-svg-charts docs for more information
 import React, { Component } from "react";
 import { View, Text, ScrollView } from "react-native";
 //@ts-ignore

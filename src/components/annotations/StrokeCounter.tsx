@@ -1,3 +1,4 @@
+//simple function for couting strokes, essentially just a plus and minus feature
 import React, { useState, useEffect } from "react";
 import {
   Button,
@@ -16,6 +17,7 @@ interface props {
   setStrokes: Function;
   strokeObj: any;
   setStrokeObject: Function;
+  currentTime: any;
 }
 
 const StrokeCounter = (props: props) => {
@@ -24,6 +26,7 @@ const StrokeCounter = (props: props) => {
   const setStrokes = props.setStrokes;
   const strokeObj = props.strokeObj;
   const setStrokeObj = props.setStrokeObject;
+  const currentTime = props.currentTime;
 
   const distances = data ? Object.keys(data).slice(2) : null;
   const [distance, setDistance] = useState<string>("");
@@ -61,7 +64,9 @@ const StrokeCounter = (props: props) => {
         title="Done"
         onPress={() => {
           setStrokes(0);
-          setStrokeObj({ ...strokeObj, [distance]: strokes });
+          setStrokeObj({ ...strokeObj, [distance]: [strokes, currentTime] });
+          console.log(currentTime);
+          console.log(strokeObj);
         }}
       />
       {/* <Button

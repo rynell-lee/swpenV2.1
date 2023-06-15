@@ -1,3 +1,5 @@
+// refer to react-native-svg-charts docs for more information
+
 import React from "react";
 import { View, StyleSheet } from "react-native";
 //@ts-ignore
@@ -12,6 +14,8 @@ interface props {
   xLabel: string;
   yLabel: string;
 }
+
+//line chart requires 2 set of data for x and y axis
 const LineCharts = (props: props) => {
   const CustomLabel = ({ x, y, data, index }: any) => (
     <Text
@@ -26,6 +30,7 @@ const LineCharts = (props: props) => {
     </Text>
   );
 
+  //additionaly functions to beautify the chart
   const CustomGrid = ({ x, y, data, ticks }: any) => (
     <Grid
       x={x}
@@ -38,6 +43,8 @@ const LineCharts = (props: props) => {
     />
   );
 
+  //additionaly functions to beautify the chart
+
   const CustomCircle = ({ x, y, data, index }: any) => (
     <Circle
       key={index}
@@ -49,6 +56,8 @@ const LineCharts = (props: props) => {
       fill="white"
     />
   );
+
+  //additionaly functions to beautify the chart
 
   const CustomCircles = ({ x, y, data }: any) => {
     return data.map((_: any, index: React.Key | null | undefined) => (

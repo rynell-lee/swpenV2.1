@@ -1,3 +1,4 @@
+//code for displaying a line tool
 import React, { useState, useRef, useContext } from "react";
 import { View, StyleSheet, Text, Button } from "react-native";
 import Svg, { Line, Circle } from "react-native-svg";
@@ -10,6 +11,8 @@ const LineTool = () => {
   const [lineEnd, setLineEnd] = useState({ x: 600, y: 200 });
   const [lineStart, setLineStart] = useState({ x: 500, y: 300 });
   const [activeCircle, setActiveCircle] = useState(false);
+
+  //function that generates the line
 
   const setActiveCircleFromEvent = (event: {
     nativeEvent: { x: any; y: any };
@@ -34,6 +37,7 @@ const LineTool = () => {
     }
   };
 
+  //code to extend the line
   const extendLine = (event: { nativeEvent: { x: any; y: any } }) => {
     const { x, y } = event.nativeEvent;
     // setLineEnd({ x, y });

@@ -1,3 +1,4 @@
+//simple function to load videos from local library
 import React, { useState, useEffect } from "react";
 import {
   Button,
@@ -9,7 +10,6 @@ import {
   Text,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface props {
@@ -57,11 +57,6 @@ const LoadVideo = (props: props) => {
         }}
         style={styles.button}
       >
-        {/* <MaterialCommunityIcons
-          name="rectangle-outline"
-          size={140}
-          color="black"
-        /> */}
         <Text style={styles.buttonText}>Load video</Text>
       </TouchableOpacity>
     </View>
@@ -70,14 +65,10 @@ const LoadVideo = (props: props) => {
 
 const styles = StyleSheet.create({
   load: {
-    // position: "absolute",
-    // backgroundColor:'white',
-    // top: 10,
     bottom: 80,
     alignItems: "center",
-    // paddingBottom: 100,
+
     marginTop: 20,
-    // justifyContent: "center",
   },
   text: {
     alignSelf: "center",

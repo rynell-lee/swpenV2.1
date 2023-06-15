@@ -1,3 +1,4 @@
+//code to view charts after annotation
 import React, { useState, useEffect, useRef } from "react";
 import {
   Text,
@@ -8,12 +9,7 @@ import {
   Alert,
   ScrollView,
 } from "react-native";
-import {
-  NavigationContainer,
-  RouteProp,
-  useNavigation,
-} from "@react-navigation/native";
-import BarCharts from "../components/charts/BarChart";
+import { useNavigation } from "@react-navigation/native";
 import MyTable from "../components/charts/Table";
 import LineCharts from "../components/charts/LineChart";
 import ViewShot, { CaptureOptions } from "react-native-view-shot";
@@ -23,11 +19,7 @@ import {
   saveToMediaLibrary,
   saveObjectAsCSV,
 } from "../components/charts/sharingFunctions";
-import RNFS from "react-native-fs";
 import Metadata from "../components/charts/Metadata";
-import Modal from "react-native-modal";
-import { RootStackParamList } from "../../App";
-import { StackNavigationProp } from "@react-navigation/stack";
 
 //convert string to seconds
 const timeToSeconds = (timeString: string): number => {
@@ -66,6 +58,7 @@ const lapData = (data: any) => {
   return [newArrayObj, newArray, xValues, yValues];
 };
 
+//function to pair distances, e.g 15-20m etc
 const createPairs = (arr1: any, arr2: any) => {
   let pairs1 = [];
   arr1.unshift(0);
@@ -90,6 +83,7 @@ const createPairs = (arr1: any, arr2: any) => {
   return grouped;
 };
 
+//function to get vel/dist array
 const velDistArr = (arr: any) => {
   for (let i = 0; i < arr.length; i++) {
     let [rangeStr, divisor] = arr[i];
@@ -103,6 +97,7 @@ const velDistArr = (arr: any) => {
   return arr;
 };
 
+//fucntion to get data for vel/dist line chart
 const vdXY = (arr: any) => {
   let firstElements = [];
   let secondElements = [];
@@ -152,6 +147,7 @@ const combineArr = (arr: any, newArr: any) => {
   return result;
 };
 
+//function to get values for distance per stroke
 const getDPS = (vel: any, srSec: any) => {
   const result = [];
   for (let i = 0; i < vel.length && i < srSec.length; i++) {
@@ -165,19 +161,11 @@ const getDPS = (vel: any, srSec: any) => {
 //line chart require 2 sets of arrays
 const ChartScreen = ({ route }: any) => {
   const navigation = useNavigation<any>();
+  const [metadata, setMetadata] = useState<any>();
+
   const { strokes, laps } = route.params;
-  const testStrokes = {
-    //take note
-    "15M": 10,
-    "20M": 9,
-    "25M": 6,
-    "40M": 7,
-    "45M": 7,
-    "50M": 6,
-  };
+
   const [newDataObj, newArray, xValues, yValues] = lapData(laps);
-  // console.log(strokes);
-  //manipulate data for each chart
 
   //metadata questionaire
   const [showQuestionnaire, setShowQuestionnaire] = useState(false);
@@ -195,7 +183,7 @@ const ChartScreen = ({ route }: any) => {
   //vdx: distance range, vdy: velocity
   const [vdX, vdY] = vdXY(VDarr);
   //stroke rate table: VDarr but no 0M - first distance, chart: vdx without 0-first, yvalue new calculation
-  const [srY, srSec] = getSRY(yValues.slice(1), testStrokes); // newArr
+  const [srY, srSec] = getSRY(yValues.slice(1), strokes); // newArr
   // const srArr = VDarr.slice(1)// arr
   const srArr = combineArr(VDarr.slice(1), srY);
   const srX = vdX.slice(1);
@@ -203,7 +191,7 @@ const ChartScreen = ({ route }: any) => {
   // console.log(srY);
 
   //stroke count: x-distance, y-count. table: VDAarr.slice + SC (usec combineArr), chart: srX, SCY (to build)
-  const scY = Object.values(testStrokes).slice(1);
+  const scY = Object.values(strokes).slice(1);
   const scArr = combineArr(VDarr.slice(1), scY);
 
   //dps: vel/srs = dist/str. table: VDArr.slice + dps, chart: srx, dpsY (to build)
@@ -241,32 +229,11 @@ const ChartScreen = ({ route }: any) => {
     },
   };
 
-  // const obj = {
-  //   DT: {
-  //     table: [1, 2, 3],
-  //     x: [4, 5, 6],
-  //     y: [7, 8, 9],
-  //   },
-  //   VD: {
-  //     table: [3, 2, 1],
-  //     x: [6, 5, 4],
-  //     y: [9, 8, 7],
-  //   },
-  // };
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
-      <ScrollView
-        // style={{ flex: 1, height: scrollViewHeight }}
-        // ref={scrollViewRef}
-        // onContentSizeChange={(_, height) => setScrollViewHeight(height)}
-        style={{ backgroundColor: "white" }}
-      >
+      <ScrollView style={{ backgroundColor: "white" }}>
         <ViewShot
           ref={viewShotRef}
-          // options={{
-          //   format: "jpg",
-          //   quality: 0.8,
-          // }}
           style={{ flex: 1, backgroundColor: "white" }}
         >
           <View style={styles.container}>
@@ -278,13 +245,7 @@ const ChartScreen = ({ route }: any) => {
               <Text style={styles.exitButtonText}>Exit</Text>
             </TouchableOpacity>
           </View>
-          {/* <Button
-            title="Check data"
-            onPress={() => {
-              console.log(strokes);
-              console.log(laps);
-            }}
-          /> */}
+
           <View style={styles.containerSection}>
             <Text style={styles.titleSection}>Distance - Time</Text>
           </View>
@@ -356,14 +317,21 @@ const ChartScreen = ({ route }: any) => {
             />
           </View>
 
-          {/* <BarCharts data={newDataObj} /> */}
+          {metadata ? (
+            <>
+              <View style={styles.containerSection}>
+                <Text style={styles.titleSection}>Event Details</Text>
+              </View>
+              <View style={styles.DTchart}>
+                <MyTable data={metadata} headers={["Details"]} />
+              </View>
+              <View style={styles.blank}></View>
+            </>
+          ) : null}
         </ViewShot>
       </ScrollView>
 
       <View style={styles.buttonContainer}>
-        {/* <TouchableOpacity style={styles.button} onPress={saveToMediaLibrary}>
-          <Text style={styles.buttonText}>Save to Media Library</Text>
-        </TouchableOpacity> */}
         <TouchableOpacity onPress={showShareOptions} style={styles.button}>
           <Text style={styles.buttonText}>Share</Text>
         </TouchableOpacity>
@@ -378,27 +346,13 @@ const ChartScreen = ({ route }: any) => {
           style={styles.button}
         >
           <Text style={styles.buttonText}>Metadata</Text>
-          {/* <Metadata
-            visible={showQuestionnaire}
-            onClose={handleCloseQuestionnaire}
-          /> */}
         </TouchableOpacity>
-      </View>
-      <Modal
-        isVisible={showQuestionnaire}
-        onBackdropPress={handleCloseQuestionnaire}
-        backdropColor="#f5f5f5"
-        backdropOpacity={0.1}
-      >
         <Metadata
           isVisible={showQuestionnaire}
           onClose={handleCloseQuestionnaire}
+          setMetadata={setMetadata}
         />
-      </Modal>
-      {/* <Metadata
-        visible={showQuestionnaire}
-        onClose={handleCloseQuestionnaire}
-      /> */}
+      </View>
     </View>
   );
 };
@@ -408,6 +362,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
+  blank: {
+    height: 150,
+  },
+
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "center",

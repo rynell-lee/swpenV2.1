@@ -1,13 +1,10 @@
+// code for camera screen
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Text, View, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import { Box, Row, Center, Column } from "native-base";
 import {
   Camera,
-  CameraDeviceFormat,
   CameraPreset,
-  CameraRuntimeError,
   useCameraDevices,
-  useFrameProcessor,
 } from "react-native-vision-camera";
 import LoadingScreen from "./LoadingScreen";
 import { useIsForeground } from "../hooks/useIsForeground";
@@ -27,11 +24,7 @@ import { NavigatorProps } from "../../App";
 import { useIsFocused } from "@react-navigation/native";
 import Settings from "../components/camera/Settings";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Modal from "react-native-modal";
-import {
-  pickerOptions,
-  displayPicker,
-} from "../components/metadata/PickerOptions";
+
 import eventJson from "../jsons/events.json";
 
 interface Point {
@@ -44,8 +37,14 @@ interface props {
   route: any;
 }
 
-const CameraScreen = (props: props) => {
+const CameraScreen = ({ route }: any) => {
   const [permission, setPermission] = useState<boolean>(false);
+
+  const { length, distance } = route.params;
+  // console.log(length, distance);
+  const ejson: any = eventJson;
+  const distances = ejson[length][distance];
+  // console.log(distances);
 
   const getData = async () => {
     try {
@@ -56,22 +55,17 @@ const CameraScreen = (props: props) => {
       // error reading value
     }
   };
-  const [length, setLength] = useState<string>("");
-  // console.log(length);
-  // console.log("async storage: ", data);
-  // const length = "Short Course";
 
   const [ready, SetReady] = useState<boolean>(false);
   const cameraRef = useRef<Camera>(null);
   const isFocused = useIsFocused();
   useEffect(() => {
     (async () => {
+      //getting phone permissions
       const mediaLibraryPermission = await MediaLibrary.getPermissionsAsync();
       const cameraPermission = await Camera.getCameraPermissionStatus();
       const microphonePermission = await Camera.getMicrophonePermissionStatus();
-      //getdata
-      getData().then((data) => setLength(data["Pool Length"]));
-      //
+
       if (
         cameraPermission !== "authorized" &&
         microphonePermission !== "authorized" &&
@@ -97,16 +91,10 @@ const CameraScreen = (props: props) => {
     })();
   }, [setPermission]);
 
-  //maybe can do some linking here to settings
-
-  // console.log(`Permission granted: ${permission}`);
+  //refer to react native visiion camera docs for more information
+  //setting up device's camera
   const devices = useCameraDevices();
   const device = devices.back;
-  // console.log(device?.formats[0].frameRateRanges);
-  // console.log(` Does device support focus: ${device?.supportsFocus}`);
-  const isAppForeground = useIsForeground();
-  //right now using preset of 'high', temper with this next time when need to select res or framerate properly
-  //specify funtion for muting !!
 
   //states for recording
   const [startRace, setStartRace] = useState<Boolean>(false);
@@ -114,22 +102,20 @@ const CameraScreen = (props: props) => {
 
   //states for settings
   const [flash, setFlash] = useState<Boolean>(false);
+  //some presets for settings
   const [res, setRes] = useState<String>("FHD");
   const [isRecording, setIsRecording] = useState<Boolean>(false);
   const [audio, setAudio] = useState<boolean>(true);
   const [course, setCourse] = useState<string>("25M");
-  const [distance, setDistance] = useState<string>("50M");
   const [eventObj, setEventObj] = useState<any>({
     "Pool Length": course,
     Distance: distance,
   });
   const [distArray, setDistArray] = useState<Array<string>>([]);
-  const eJson: any = eventJson;
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
-  // console.log(`is flash on: ${flash}`);
 
   //states for timer
   const [start, setStart] = useState<number>(0);
@@ -141,7 +127,7 @@ const CameraScreen = (props: props) => {
   const [i, setI] = useState<number>(0);
   // const [current, setCurrent] = useState<any>();
 
-  //determine res
+  //determine resolution
   let resolution: CameraPreset | undefined;
   if (res === "HD") {
     resolution = "hd-1280x720";
@@ -152,6 +138,7 @@ const CameraScreen = (props: props) => {
   }
   // console.log(`Resolution: ${resolution}`);
 
+  //focus function, but does not work
   const focus = (event: any) => {
     try {
       let point: Point = {
@@ -159,11 +146,12 @@ const CameraScreen = (props: props) => {
         y: event.y,
       };
       console.log(point);
-      // return await cameraRef.current?.focus(point);
     } catch (err) {
       console.log(err);
     }
   };
+
+  //useless function but here maybe for future use. it gets the x and y coordinate when tapping on screen
   const singleTap = Gesture.Tap()
     .maxDuration(250)
     .onStart(async (event: TapGestureHandlerEventPayload) => {
@@ -173,16 +161,13 @@ const CameraScreen = (props: props) => {
         y: event.y,
       };
       console.log(point);
-      // try {
-      //   // cameraRef.current?.focus(point);
-      // } catch (err) {
-      //   console.error(err);
-      // }
     });
   //if statement if camera is denied..
   if (device === null || device === undefined) {
     return <LoadingScreen item={"Camera"} />;
   }
+
+  //alot of self built components were exported and used here, refer to component files for code
   return (
     <View style={styles.container}>
       <GestureHandlerRootView style={styles.container}>
@@ -241,11 +226,10 @@ const CameraScreen = (props: props) => {
             lapArray={lapArray}
             setLapArray={setLapArray}
             course={course}
-            distance={distance}
+            distances={distances}
             distArray={distArray}
             setTimeObj={setTimeObj}
           />
-          {/* <EndMarker isRecording={isRecording} /> */}
         </View>
         <View style={styles.exit}>
           <ExitMarker isRecording={isRecording} />
@@ -261,8 +245,8 @@ const CameraScreen = (props: props) => {
             setAudio={setAudio}
             course={course}
             setCourse={setCourse}
-            distance={distance}
-            setDistance={setDistance}
+            // distance={distance}
+            // setDistance={setDistance}
             toggleModal={toggleModal}
           />
         </View>
@@ -275,32 +259,6 @@ const CameraScreen = (props: props) => {
           lapArray={lapArray}
         />
       </View>
-
-      <Modal
-        isVisible={isModalVisible}
-        backdropColor={"#00000080"}
-        onBackdropPress={toggleModal}
-      >
-        <View style={styles.box}>
-          <View style={styles.modalBox}>
-            {pickerOptions(3)?.map((x, index) =>
-              displayPicker(true, x, index, eventObj)
-            )}
-            <TouchableOpacity
-              onPress={() => {
-                // console.log(eventObj);
-                setCourse(eventObj["Pool Length"]);
-                setDistance(eventObj["Distance"]);
-                setDistArray(eJson[course][distance]);
-                // console.log(eJson["25M"]["100M"]);
-                toggleModal();
-              }}
-            >
-              <Text style={styles.done}>Done</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 };

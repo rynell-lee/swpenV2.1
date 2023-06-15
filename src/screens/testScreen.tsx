@@ -1,263 +1,223 @@
-import React, { useRef } from "react";
+import React, { useState } from "react";
+import { View, Button, Image, StyleSheet, Text } from "react-native";
 import {
-  View,
-  TouchableOpacity,
-  Text,
-  Platform,
-  Image,
-  StyleSheet,
-  Alert,
-} from "react-native";
-import ViewShot, { CaptureOptions } from "react-native-view-shot";
+  FFmpegKit,
+  FFmpegKitConfig,
+  FFmpegSession,
+  ReturnCode,
+} from "ffmpeg-kit-react-native";
 import RNFS from "react-native-fs";
-import Share from "react-native-share";
-import * as MediaLibrary from "expo-media-library";
-//@ts-ignore
-import RNHTMLtoPDF from "react-native-html-to-pdf";
+import FFmpegWrapper from "../components/annotations/Ffmpeg";
 
-const imageUrl = "https://picsum.photos/200";
+function executeFFmpegCommand(
+  command: string,
+  callback: (arg0: FFmpegSession | null) => void
+) {
+  FFmpegKit.execute(command)
+    .then((execution) => {
+      callback(execution);
+    })
+    .catch((error) => {
+      console.error(error);
+      callback(null);
+    });
+}
 
-const viewShotRef: React.RefObject<ViewShot> = React.createRef();
+async function extractFrames(inputPath: string, frameRate: number) {
+  const outputPattern = "output_frame_%04d.png";
+  const outputPath = RNFS.CachesDirectoryPath + "/" + outputPattern;
 
-const isError = (error: unknown): error is Error => {
-  return error instanceof Error;
-};
-const TestScreen = () => {
-  // const viewShotRef: React.RefObject<ViewShot> = React.createRef();
+  try {
+    const command = `-i ${inputPath} -vf fps=${frameRate} -vsync 0 ${outputPath}`;
+    // const execution: any = await FFmpegKit.execute(command);
 
-  const captureScreen = async () => {
-    try {
-      const uri = await viewShotRef?.current.capture();
-      const timestamp = new Date().toISOString();
-      const path = `${RNFS.DocumentDirectoryPath}/${timestamp}.png`;
-      await RNFS.moveFile(uri, path);
+    FFmpegKit.executeAsync(
+      command,
+      async (session) => {
+        const state = FFmpegKitConfig.sessionStateToString(
+          await session.getState()
+        );
+        const returnCode = await session.getReturnCode();
+        const failStackTrace = await session.getFailStackTrace();
+        const duration = await session.getDuration();
 
-      return path;
-    } catch (error) {
-      console.error("Error capturing screen:", error);
-    }
-  };
+        if (ReturnCode.isSuccess(returnCode)) {
+          console.log(
+            `Encode completed successfully in ${duration} milliseconds;.`
+          );
+          // console.log(`Check at ${outputImagePath}`);
+          // successCallback(outputImagePath);
+          const frameFiles = await RNFS.readdir(RNFS.CachesDirectoryPath);
+          const frames: any = [];
+          // console.log("data", frames);
 
-  const saveToMediaLibrary = async () => {
-    try {
-      const path = await captureScreen();
-      if (!path) return;
-
-      const { status } = await MediaLibrary.requestPermissionsAsync();
-      if (status !== "granted") {
-        console.log("User cancelled media library permissions");
-        alert("Media Library permission is required to save the image.");
-        return;
-      }
-
-      const asset = await MediaLibrary.createAssetAsync(`file://${path}`);
-
-      const albumName = "MyAppScreenshots"; // You can choose a custom name for your album
-      const album = await MediaLibrary.getAlbumAsync(albumName);
-
-      if (!album) {
-        await MediaLibrary.createAlbumAsync(albumName, asset, false);
-      } else {
-        await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
-      }
-
-      console.log("Image saved to media library");
-    } catch (err) {
-      if (
-        isError(err) &&
-        err.message === "User didn't grant write permission to requested files."
-      ) {
-        console.log("User denied write permission to requested files");
-      } else {
-        console.error("Error saving image:", err);
-      }
-    }
-  };
-
-  const shareImage = async () => {
-    const path = await captureScreen();
-    if (!path) return;
-
-    const shareOptions = {
-      title: "Share Screenshot",
-      message: "Check out this screenshot!",
-      url: `file://${path}`,
-      type: "image/png",
-    };
-
-    Share.open(shareOptions)
-      .then((res) => console.log("Share success:", res))
-      .catch((err) => {
-        if (err.message === "User did not share") {
-          console.log("User cancelled sharing");
-        } else {
-          console.error("Error sharing image:", err);
-        }
-      });
-  };
-
-  const shareImageAsPdf = async () => {
-    if (!viewShotRef.current) {
-      console.error("ViewShot ref not available");
-      return;
-    }
-
-    try {
-      const path = await viewShotRef?.current.capture();
-      const imagePath = `file://${path}`;
-
-      const html = `
-        <!DOCTYPE html>
-        <html>
-          <body>
-            <img src="${imagePath}" style="width: 100%; height: auto;" />
-          </body>
-        </html>
-      `;
-
-      const pdfOptions = {
-        html,
-        fileName: "screenshot",
-        base64: true,
-      };
-
-      const pdf = await RNHTMLtoPDF.convert(pdfOptions);
-
-      const shareOptions = {
-        url: `data:application/pdf;base64,${pdf.base64}`,
-        type: "application/pdf",
-        message: "Here is a screenshot from MyApp as a PDF",
-      };
-
-      Share.open(shareOptions)
-        .then((res) => console.log("Share success:", res))
-        .catch((err) => {
-          if (err.message === "User did not share") {
-            console.log("User cancelled sharing");
-          } else {
-            console.error("Error sharing image:", err);
+          for (const file of frameFiles) {
+            if (file.startsWith("output_frame_")) {
+              const frameData = await RNFS.readFile(
+                RNFS.CachesDirectoryPath + "/" + file,
+                "base64"
+              );
+              frames.push(`data:image/png;base64,${frameData}`);
+            }
           }
-        });
-    } catch (err) {
-      console.error("Error sharing image as PDF:", err);
-    }
+          console.log("data", frames);
+
+          return frames;
+        } else {
+          console.log("Encode failed. Please check log for the details.");
+
+          // errorCallback();
+        }
+      },
+      (log) => {
+        console.log(log.getMessage());
+      },
+      (statistics) => {
+        console.log(statistics);
+      }
+    ).then((session) =>
+      console.log(
+        `Async FFmpeg process started with sessionId ${session.getSessionId()}.`
+      )
+    );
+    //new code
+    // let executionResult: any = await new Promise<void>((resolve) => {
+    //   executeFFmpegCommand(command, (execution) => {
+    //     executionResult = execution;
+    //     // console.log("exectuion", execution);
+    //     resolve();
+    //   });
+    // });
+    //
+    // if (
+    //   executionResult &&
+    //   executionResult.getReturnCode() === 0
+    //   // execution.getReturnCode() !== undefined
+    // ) {
+    //   const frameFiles = await RNFS.readdir(RNFS.CachesDirectoryPath);
+    //   const frames: any = [];
+    //   console.log("data", frames);
+
+    //   for (const file of frameFiles) {
+    //     if (file.startsWith("output_frame_")) {
+    //       const frameData = await RNFS.readFile(
+    //         RNFS.CachesDirectoryPath + "/" + file,
+    //         "base64"
+    //       );
+    //       frames.push(`data:image/png;base64,${frameData}`);
+    //     }
+    //   }
+    //   console.log("data", frames);
+
+    //   return frames;
+    // } else {
+    //   throw new Error(
+    //     `FFmpeg execution failed with return code: ${
+    //       executionResult ? executionResult.returnCode : "undefined"
+    //     }`
+    //   );
+    // }
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+}
+
+const ImageGallery = ({ images }: any) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
   };
 
-  const showShareOptions = () => {
-    Alert.alert(
-      "Share Screenshot",
-      "Choose the format you want to share the screenshot in:",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Image",
-          onPress: () => shareImage(),
-        },
-        {
-          text: "PDF",
-          onPress: () => shareImageAsPdf(),
-        },
-        // {
-        //   text: "Cancel",
-        //   style: "cancel",
-        // },
-      ],
-      { cancelable: true }
+  const handlePreviousImage = () => {
+    setCurrentImageIndex(
+      (prevIndex) => (prevIndex - 1 + images.length) % images.length
     );
   };
 
-  const webViewRef = useRef(null);
-
-  const captureEntireWebView = async () => {
-    if (!webViewRef.current) {
-      console.error("WebView ref not available");
-      return;
-    }
-
-    try {
-      const base64Data = await webViewRef.current.captureSnapshot({
-        format: "png",
-        quality: 1,
-        snapshotContentContainer: false,
-      });
-      console.log("Captured WebView Base64 Data:", base64Data);
-      // Save, share, or do something else with the base64 data here
-    } catch (err) {
-      console.error("Error capturing WebView:", err);
-    }
-  };
-
   return (
-    <View style={{ flex: 1 }}>
-      <ViewShot
-        ref={viewShotRef}
-        options={{
-          format: "jpg",
-          quality: 0.8,
+    <View>
+      <Image
+        source={{ uri: images[currentImageIndex] }}
+        style={{ width: 300, height: 300 }}
+      />
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          marginTop: 10,
         }}
-        style={{ flex: 1 }}
       >
-        {/* source */}
-        <Image source={{ uri: imageUrl }} style={{ width: 200, height: 200 }} />
-      </ViewShot>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={saveToMediaLibrary}>
-          <Text style={styles.buttonText}>Save to Media Library</Text>
-        </TouchableOpacity>
-        {/* <TouchableOpacity style={styles.button} onPress={shareImage}>
-          <Text style={styles.buttonText}>Share</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={shareImageAsPdf}>
-          <Text>Share Screenshot as PDF</Text>
-        </TouchableOpacity> */}
-        <TouchableOpacity onPress={showShareOptions} style={styles.button}>
-          <Text style={styles.buttonText}>Share Screenshot</Text>
-        </TouchableOpacity>
+        <Button
+          title="Previous"
+          onPress={handlePreviousImage}
+          disabled={currentImageIndex === 0}
+        />
+        <Button
+          title="Next"
+          onPress={handleNextImage}
+          disabled={currentImageIndex === images.length - 1}
+        />
       </View>
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 10,
-  },
-  button: {
-    backgroundColor: "#4b7bec",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 30,
-    marginHorizontal: 10,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-  },
-});
+const FrameExtractor = () => {
+  const [images, setImages] = useState([]);
+  const uri =
+    "file:///data/user/0/com.ssi.swpencamera/cache/VisionCamera-20230329_0338019084713904147356316.mp4";
 
-export default TestScreen;
+  const uri2 =
+    "file:///data/user/0/com.ssi.swpencamera/cache/ImagePicker/16e3f33b-a6af-4704-84f1-7c755a6b2946.mp4";
 
-// const captureEntireScrollableContent = async () => {
-//   if (!scrollViewRef.current || !viewShotRef.current) {
-//     console.error("ScrollView or ViewShot ref not available");
-//     return;
-//   }
+  const handleExtractFrames = async () => {
+    // const extractedImages: any = await extractFrames(uri2, 30);
+    extractFrames(uri2, 30)
+      .then((data: any) => {
+        setImages(data);
+        // console.log("images length", images.length);
+      })
+      .then(() => {
+        console.log("images length", images.length);
+      })
+      .catch((err) => console.log(err));
+    // console.log("images length", extractedImages.length);
+    // setImages(extractedImages);
 
-//   try {
-//     setScrollViewHeight(undefined);
-//     await new Promise((resolve) => setTimeout(resolve, 100));
+    return <Text>Done</Text>;
+  };
 
-//     const path = await viewShotRef?.current.capture();
+  // extractFrames(uri, 30);
 
-//     setScrollViewHeight(undefined);
-//     return path;
-//   } catch (err) {
-//     console.error("Error capturing scrollable content:", err);
-//   }
-// };
+  // FFmpegKit.execute(
+  //   `-i ${uri} -vf "select=eq(n\, 30)" -vsync 0 output_frame_%04d.png`
+  // )
+  //   .then(async (session) => {
+  //     const returnCode = await session.getReturnCode();
+  //     const logs = await session.getLogs();
+  //     // console.log(session);
+  //     console.log(returnCode);
+  //   })
+  //   .catch((err) => console.log(err));
+  return (
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      {/* {images.length > 0 ? (
+        <ImageGallery images={images} />
+      ) : (
+        <Button title="Extract Frames" onPress={handleExtractFrames} />
+        // <Text>hello</Text>
+      )}
+      <ImageGallery /> */}
+      <Button title="Extract Frames" onPress={handleExtractFrames} />
+      {/* {images.length > 0 ? <ImageGallery images={images} /> : null} */}
+    </View>
+  );
+};
+
+export default FrameExtractor;
+
+// "file:///data/user/0/com.ssi.swpencamera/cache/VisionCamera-20230329_0338019084713904147356316.mp4",
+
+//ffmpeg -i input_video.mp4 -vf "select=eq(n\,frame_number)" -vsync 0 output_frame_%04d.png

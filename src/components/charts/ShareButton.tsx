@@ -1,3 +1,4 @@
+//code for sharing data
 import React from "react";
 import {
   View,
@@ -22,6 +23,7 @@ const isError = (error: unknown): error is Error => {
 };
 const viewShotRef: React.RefObject<ViewShot> = React.createRef();
 const ShareButton = () => {
+  //function for screenshot
   const captureScreen = async () => {
     try {
       const uri = await viewShotRef?.current.capture();
@@ -35,6 +37,7 @@ const ShareButton = () => {
     }
   };
 
+  //function to save screenshot
   const saveToMediaLibrary = async () => {
     try {
       const path = await captureScreen();
@@ -93,6 +96,7 @@ const ShareButton = () => {
       });
   };
 
+  //function to share image as pdf
   const shareImageAsPdf = async () => {
     if (!viewShotRef.current) {
       console.error("ViewShot ref not available");
@@ -140,6 +144,8 @@ const ShareButton = () => {
     }
   };
 
+  //alerts to ask user how they want to save the data
+
   const showShareOptions = () => {
     Alert.alert(
       "Share Screenshot",
@@ -157,10 +163,6 @@ const ShareButton = () => {
           text: "PDF",
           onPress: () => shareImageAsPdf(),
         },
-        // {
-        //   text: "Cancel",
-        //   style: "cancel",
-        // },
       ],
       { cancelable: true }
     );

@@ -1,3 +1,4 @@
+//function to record timings for various distances
 import React, { useState, useEffect, useRef, ReactNode } from "react";
 import { Text, View, TouchableOpacity, Button, StyleSheet } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -25,7 +26,7 @@ interface props {
   setLapArray: Function;
   lapArray: any[];
   course: string;
-  distance: string;
+  distances: any;
   distArray: string[];
   setTimeObj: Function;
 }
@@ -39,34 +40,17 @@ const DistanceMarker = (props: props) => {
   const setLapArray = props.setLapArray;
   const lapArray = props.lapArray;
   const course = props.course;
-  const distance = props.distance;
+  const distances = props.distances;
   const eJson: any = eventJson;
   const setTimeObj = props.setTimeObj;
-  // const distArray = props.distArray;
+  const distArray = props.distArray;
 
-  // console.log(course);
-  // console.log(distance);
-  // console.log(distArray);
-  // console.log(dataObj);
   const [data, SetData] = useState<string>(length);
-  // const [start, setStart] = useState<Boolean>(false);
-  // const [breakOut, setBreakOut] = useState<Boolean>(false);
-  const [dist, setDist] = useState<Array<any>>();
+
+  const [dist, setDist] = useState<Array<any>>(distances);
   const [current, setCurrent] = useState<any>();
-  // const [i, setI] = useState<number>(0);
   const i = props.i;
   const setI = props.setI;
-
-  //setting distances for respective pool length
-  useEffect(() => {
-    setCurrent(dist ? dist[0] : null);
-    // if (data === "Short Course") {
-    //   setDist([1, 2, 3, 4]);
-    // } else {
-    //   setDist([1, 2, 3, 4, 5]);
-    // }
-    setDist(eJson[course][distance]);
-  }, []);
 
   //states for timers
   const setStart = props.setStart;
@@ -81,9 +65,6 @@ const DistanceMarker = (props: props) => {
   const duration = moment.duration(timer);
   const pad = (n: any) => (n < 10 ? "0" + n : n);
   const miliseconds = Math.floor(duration.milliseconds() / 10);
-  // const timeRecorded = `${pad(duration.minutes())}:${pad(
-  //   duration.seconds()
-  // )}:${pad(miliseconds)}`;
   const timeRecorded = `${pad(duration.hours())}:${pad(
     duration.minutes()
   )}:${pad(duration.seconds())}`;
@@ -105,10 +86,7 @@ const DistanceMarker = (props: props) => {
         setNow(new Date().getTime());
       }, 1000)
     );
-    // return stopwatch;
-    // setCurrent(dist ? dist[0] : null);
-    // setDist(distArray);
-    setDist(eJson[course][distance]);
+    // setDist(eJson[course][distance]);C
   };
   const stopTimer = () => {
     clearInterval(timeInterval);
@@ -121,9 +99,6 @@ const DistanceMarker = (props: props) => {
     if (dist != undefined) {
       setCurrent(dist[i]);
     }
-    // if (current == "END") {
-    //   setCurrent("END");
-    // }
   };
 
   const raceStart = () => {
@@ -178,8 +153,6 @@ const DistanceMarker = (props: props) => {
             setLapArray([...lapArray, ["End", timeRecorded]]);
             console.log(`Race ended`);
             setTimeObj(arrToObj(lapArray));
-
-            // console.log(lapArray);
           }}
         >
           <View style={styles.centre}>
@@ -191,6 +164,7 @@ const DistanceMarker = (props: props) => {
     );
   };
 
+  //function to decide which icon to display
   const outOrMarker = () => {
     return breakOut ? marker() : out();
   };

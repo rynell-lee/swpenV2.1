@@ -1,3 +1,4 @@
+//not in use, but this is another example of trying to build a smooth scrubber
 import React, { useState } from "react";
 import { View, TouchableOpacity, StyleSheet, Text } from "react-native";
 import Scrubber from "react-native-scrubber";

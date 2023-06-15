@@ -1,3 +1,5 @@
+//customised video player built
+//refer to react native video and community slider docs for more information
 import React, { useState, useRef, forwardRef } from "react";
 import { View, Button, TouchableOpacity, Text, StyleSheet } from "react-native";
 import Video from "react-native-video";
@@ -34,26 +36,14 @@ const CustomVideoPlayer = forwardRef((props: props, ref) => {
   const justJumped = props.justJumped;
   const setJustJumped = props.setJustJumped;
   const videoRef = ref;
-  //   const [currentTime, setCurrentTime] = useState(0);
-  //   const [sliderValue, setSliderValue] = useState(0);
+
   const [duration, setDuration] = useState(0);
   const [isSliding, setIsSliding] = useState(false);
-
-  //   const [paused, setPaused] = useState(false);
-  // const videoRef = useRef(null);
-
-  const debouncedSeek = debounce((value: any) => {
-    videoRef?.current.seek(value);
-  }, 10); // Adjust debounce time (in ms) for desired smoothness
 
   ///testing stuff
   const [timer, setTimer] = useState(0);
 
-  // const interval = setInterval(function () {
-  //   setTimer(timer + 10); // increase timer by 10ms
-  // }, 1000);
-
-  /////
+  ///// function for playing or pausing video
   const playOrpause = () => {
     if (!paused) {
       return (
@@ -74,6 +64,7 @@ const CustomVideoPlayer = forwardRef((props: props, ref) => {
     }
   };
 
+  //formatting the time beside the slider
   const formatTime = (seconds: number) => {
     const h = Math.floor(Math.abs(seconds) / 3600);
     const m = Math.floor((Math.abs(seconds) % 3600) / 60);

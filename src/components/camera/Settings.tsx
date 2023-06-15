@@ -1,10 +1,7 @@
+//codes for settings bar
 import React, { useState } from "react";
 import { TouchableOpacity, Button, StyleSheet, View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import RecordButton from "./Record";
-import { NavigationContainer } from "@react-navigation/native";
-import { Feather } from "@expo/vector-icons";
-import Modal from "react-native-modal";
 
 interface props {
   flash: Boolean;
@@ -16,8 +13,7 @@ interface props {
   setAudio: Function;
   course: String;
   setCourse: Function;
-  distance: String;
-  setDistance: Function;
+
   toggleModal: Function;
 }
 const Settings = (props: props) => {
@@ -36,15 +32,16 @@ const Settings = (props: props) => {
   const setAudio = props.setAudio;
   const course = props.course;
   const setCourse = props.setCourse;
-  const distance = props.distance;
-  const setDistance = props.setDistance;
+
   const toggleModal = props.toggleModal;
+  // const distArray = props.distArray;
 
   //flash stuff
   const showFlashSettings = () => {
     setFlashSettings(!flashSettings);
   };
 
+  //function to toggle flash, not in use
   const flashOption = () => {
     return (
       <View style={styles.options}>
@@ -92,13 +89,14 @@ const Settings = (props: props) => {
     );
   };
 
-  //resoluition stuff
+  //when displaying specific setting, hides the rest
   const showResSettings = () => {
     setResSettings(!resSettings);
     showAud();
     showEvt();
   };
 
+  //function to determine resolution secleted
   const resOptions = () => {
     return (
       <View style={styles.options}>
@@ -149,7 +147,7 @@ const Settings = (props: props) => {
       </TouchableOpacity>
     );
   };
-  //audio
+  //audio function
   const audioButton = () => {
     return audio ? (
       <TouchableOpacity onPress={() => setAudio(false)}>
@@ -171,38 +169,6 @@ const Settings = (props: props) => {
   const showEvt = () => {
     setShowEvent(!showEvent);
   };
-  const event = () => {
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          toggleModal();
-          // eventOptions();
-        }}
-      >
-        <View style={styles.centre}>
-          <Feather name="square" size={50} color="white" />
-          <Text style={styles.distance}>{distance}</Text>
-          <Text style={styles.event}>{course}</Text>
-        </View>
-      </TouchableOpacity>
-    );
-  };
-
-  // const eventOptions = () => {
-  //   return (
-  //     <Modal
-  //       isVisible={isModalVisible}
-  //       backdropColor={"#00000080"}
-  //       onBackdropPress={toggleModal}
-  //     >
-  //       <View style={styles.box}>
-  //         <View style={styles.modalBox}>
-  //           <Text>Test</Text>
-  //         </View>
-  //       </View>
-  //     </Modal>
-  //   );
-  // };
 
   //display settings
   const showSettings = () => {
@@ -211,7 +177,7 @@ const Settings = (props: props) => {
         {/* {flashSettings ? flashOption() : singleFlash()} */}
         {resSettings ? resOptions() : singleRes()}
         {showAudio ? audioButton() : null}
-        {showEvent ? event() : null}
+        {/* {showEvent ? event() : null} */}
       </View>
     );
   };

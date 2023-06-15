@@ -8,6 +8,8 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+//modal 2 renders more questions, u can find the various types of questions below
+//refer to react-native-picker docs for more information
 const MdModal2 = (props: any) => {
   const navigation = useNavigation<any>();
   const isModalVisible = props.visible;

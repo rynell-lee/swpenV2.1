@@ -1,3 +1,4 @@
+//function to display timer and laps table
 import React, { useState, useEffect, useRef, ReactNode } from "react";
 import {
   Text,

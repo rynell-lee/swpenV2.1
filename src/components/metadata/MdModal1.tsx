@@ -15,9 +15,6 @@ const MdModal1 = (props: any) => {
   const showPicker = props.picker.condition;
   const pickerOption = props?.picker?.option; //which picker to show
   const dataObj = props.obj;
-  // if (dataObj !== undefined) {
-  //   console.log(dataObj);
-  // }
 
   //for md modal 2
   const [isModalVisible2, setModalVisible2] = useState(false);
@@ -25,6 +22,7 @@ const MdModal1 = (props: any) => {
     setModalVisible2(!isModalVisible2);
   };
 
+  //modal 1 renders 3 main questions which are, category, pool length and race type
   //condition to render modal2
   const renderModal2 = (obj: any) => {
     if (

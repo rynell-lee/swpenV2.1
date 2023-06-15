@@ -1,3 +1,5 @@
+// home screen code, 3 main icons
+
 import React, { useState, useEffect, useRef } from "react";
 import {
   Text,
@@ -9,23 +11,32 @@ import {
   ScrollView,
 } from "react-native";
 import { NavigatorProps } from "../../App";
-import {
-  Gesture,
-  GestureDetector,
-  GestureHandlerRootView,
-  TapGestureHandler,
-} from "react-native-gesture-handler";
+import { Gesture } from "react-native-gesture-handler";
 import { FontAwesome5, FontAwesome } from "@expo/vector-icons";
-import { Ionicons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
-import MdModal1 from "../components/metadata/MdModal1";
 import { AntDesign } from "@expo/vector-icons";
+import Modal from "react-native-modal";
 
-const HomeScreen = ({ navigation }: NavigatorProps) => {
+import {
+  distancePicker,
+  PoolLengthPicker,
+} from "../components/metadata/Pickers";
+import { useNavigation } from "@react-navigation/native";
+const HomeScreen = () => {
   //modal toggling
+  const navigation = useNavigation<any>();
   const [isModalVisible, setModalVisible] = useState<any>(false);
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
+  };
+
+  //default parameters for modal
+  const [length, setLength] = useState<any>("50M");
+  const [distance, setDistance] = useState<any>("50M");
+
+  const eventData = {
+    length: length,
+    distance: distance,
   };
 
   //generate data object
@@ -41,43 +52,18 @@ const HomeScreen = ({ navigation }: NavigatorProps) => {
     });
   };
 
-  const singleTap = Gesture.Tap()
-    .maxDuration(250)
-    .onStart(() => {
-      console.log("tap");
-    });
-
-  const data = {
-    csvData: [1, 2, 3],
-  };
   return (
     <View style={styles.view}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scroll}
       >
-        {/* <Text style={styles.headers}>Home Screen</Text> */}
-        {/* <TouchableOpacity
+        <TouchableOpacity
           onPress={() => {
+            // navigation.navigate("Camera")
             toggleModal();
-            generateDataObj();
           }}
         >
-          <FontAwesome5
-            name="swimmer"
-            size={200}
-            style={styles.icons}
-            color="black"
-          />
-          <MdModal1
-            visible={isModalVisible}
-            toggle={toggleModal}
-            picker={{ condition: true, option: 1 }}
-            obj={dataObj}
-            navigation={navigation.navigate}
-          />
-        </TouchableOpacity> */}
-        <TouchableOpacity onPress={() => navigation.navigate("Camera")}>
           <Entypo name="video-camera" size={200} color="black" />
           <Text style={styles.label}>Camera</Text>
         </TouchableOpacity>
@@ -91,26 +77,32 @@ const HomeScreen = ({ navigation }: NavigatorProps) => {
           <AntDesign name="linechart" size={200} color="black" />
           <Text style={styles.label}>Statistics</Text>
         </TouchableOpacity>
-        {/* <TouchableOpacity onPress={() => navigation.navigate("Scrub")}>
-          <FontAwesome
-            name="newspaper-o"
-            size={200}
-            style={styles.icons}
-            color="black"
-          />
-        </TouchableOpacity> */}
-        {/* <Button title="Camera" onPress={() => navigation.navigate("Camera")} />
-        <Button
-          title="Loading"
-          onPress={() => navigation.navigate("Loading")}
-        />
-        <Button title="Test" onPress={() => navigation.navigate("Test")} /> */}
-        {/* <GestureHandlerRootView>
-          <GestureDetector gesture={Gesture.Exclusive(singleTap)}>
-            <View style={styles.ball} />
-          </GestureDetector>
-        </GestureHandlerRootView> */}
+        <Button title="test" onPress={() => navigation.navigate("Test")} />
       </ScrollView>
+      <Modal
+        isVisible={isModalVisible}
+        backdropColor={"#00000080"}
+        onBackdropPress={toggleModal}
+      >
+        <View style={styles.box}>
+          <View style={styles.modalBox}>
+            <Text style={styles.question}>Select pool length</Text>
+            {PoolLengthPicker(length, setLength)}
+            <Text style={styles.question}>Select event</Text>
+            {distancePicker(distance, setDistance)}
+
+            <TouchableOpacity
+              onPress={() => {
+                toggleModal();
+                // console.log(length, distance);
+                navigation.navigate("Camera", eventData);
+              }}
+            >
+              <Text style={styles.done}>Done</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -144,6 +136,35 @@ const styles = StyleSheet.create({
     color: "#333",
     fontSize: 36,
     textAlign: "center",
+  },
+  box: {
+    justifyContent: "center",
+    alignItems: "center",
+    flex: 1,
+    height: 50,
+    // position: "absolute",
+  },
+  modalBox: {
+    // position: "absolute",
+    padding: 10,
+    // paddingLeft: 100,
+    // flex: 1,
+    flexDirection: "column",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+    opacity: 1,
+    width: 250,
+    height: 250,
+  },
+  done: {
+    fontSize: 20,
+    alignSelf: "center",
+  },
+  question: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+    // paddingLeft: 200,/
   },
 });
 
